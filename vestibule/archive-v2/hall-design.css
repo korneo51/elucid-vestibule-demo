@@ -1,0 +1,51 @@
+/* Portal coordinates are fitted to the generated architecture, independently of the text. */
+.photo-hall .wall{background:#08111d}.photo-hall .hall-background{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;max-width:none}
+.photo-hall .hall-photo-shade{position:absolute;inset:0;background:linear-gradient(0deg,#060d19b3,transparent 24%,transparent 85%,#040b1722);pointer-events:none}
+.photo-hall .hall-heading{top:25%;left:35%;width:30%;text-align:center}.photo-hall .hall-heading .eyebrow{color:#b2d4da;font-size:8px;letter-spacing:.28em}.photo-hall .hall-heading h2{font-size:clamp(18px,2.1vw,34px);line-height:1.05;margin-top:10px;color:#edf1f0}.photo-hall .hall-heading em{font-family:inherit;color:#dfac7f;font-size:.85em}
+.photo-hall .hall-label{display:none}.photo-hall .side-access{position:absolute;left:0;top:0;right:auto;width:300px;height:600px;perspective:none;transform-origin:0 0;z-index:3}
+.photo-hall .room-link,.photo-hall .right-access .room-link{width:100%;height:100%;background:transparent;border:none;box-shadow:none;transform:none;filter:none;isolation:auto;overflow:visible;outline-offset:8px}
+.photo-hall .room-link:before{display:none}.photo-hall .door-opening{position:absolute;inset:0;perspective:1000px;perspective-origin:50% 50%;pointer-events:none;overflow:visible}
+.photo-hall .swing-leaf{position:absolute;inset:0;display:block;transform-origin:0 50%;transform:rotateY(0deg);transition:transform .85s cubic-bezier(.2,.7,.2,1),filter .5s;transform-style:preserve-3d;backface-visibility:hidden;box-shadow:inset 0 0 0 3px #17100b,5px 5px 14px #0008}
+.photo-hall .door-material{position:absolute;inset:0;background:#172330;border:2px solid #382619}
+.photo-hall .laboratory .door-material{background-position:right center;border-color:#14293e}
+.photo-hall .laboratory .swing-leaf{transform-origin:100% 50%;box-shadow:inset 0 0 0 3px #111d2b,-5px 5px 14px #0008}
+.photo-hall .antique:hover .swing-leaf,.photo-hall .antique:focus-visible .swing-leaf{transform:rotateY(-68deg);filter:brightness(1.08)}
+.photo-hall .laboratory:hover .swing-leaf,.photo-hall .laboratory:focus-visible .swing-leaf{transform:rotateY(68deg);filter:brightness(1.08)}
+.photo-hall .door-plaque{position:absolute;left:9%;right:9%;top:13%;padding:22px 8px 20px;display:block;text-align:center;background:linear-gradient(125deg,#22150bed,#46301bee,#21160ced);border:2px solid #b28a47;box-shadow:0 4px 12px #0008,inset 0 0 0 4px #251a10,inset 0 0 0 5px #8a683c;backface-visibility:hidden;transform:translateZ(2px)}
+.photo-hall .plaque-index{display:block;font:9px Manrope,sans-serif;color:#c6a66b;letter-spacing:.22em;margin-bottom:12px}.photo-hall .plaque-title{display:block;color:#f3dcaa;font:bold 29px/1.15 Georgia,serif;text-shadow:0 2px 2px #000}.photo-hall .plaque-rule{display:block;width:45%;height:1px;margin:16px auto 0;background:linear-gradient(90deg,transparent,#d9ae65,transparent)}
+.photo-hall .laboratory .door-plaque{background:linear-gradient(125deg,#0b1b2bee,#132b43f5);border:1px solid #759bef;box-shadow:0 0 18px #477eef26,inset 0 0 0 5px #0b1929;top:15%}.photo-hall .laboratory .plaque-title{font:600 34px/1.1 Manrope,sans-serif;letter-spacing:-.055em;color:#8aaeff;text-shadow:0 0 15px #527bef55}.photo-hall .laboratory .plaque-title>span{color:#ed9d51}.photo-hall .laboratory .plaque-index{color:#87a8dd}.photo-hall .laboratory .plaque-rule{background:linear-gradient(90deg,#5375e9,#e29c51)}.photo-hall .plaque-status{font:8px Manrope,sans-serif;display:block;letter-spacing:.14em;color:#a3bddc;margin-top:14px}
+.photo-hall .hover-invite{position:absolute;left:8%;right:8%;bottom:8%;background:#07101cdb;border:1px solid #c9976080;padding:13px 12px;font-size:13px;opacity:0;transition:opacity .3s .1s;box-shadow:0 4px 20px #0006;text-align:center;pointer-events:none}.photo-hall .hover-invite b{padding-left:15px;font-weight:400}.photo-hall .room-link:hover .hover-invite,.photo-hall .room-link:focus-visible .hover-invite{opacity:1}
+.photo-hall .threshold{border:3px solid #d27b2e;box-shadow:0 0 0 4px #172533,0 0 0 9px #bb591c,0 12px 20px #0008}.photo-hall .threshold:after{border:none;inset:-10px;box-shadow:0 -5px 12px #ec9e3b20}.photo-hall .threshold .leaf{background:linear-gradient(105deg,#142330,#2c3c4a,#142432)}.photo-hall .door-mark{color:#a9ced8;font-size:8px}.photo-hall .mechanism{width:30%;left:35%;top:44%}
+.photo-hall .hall-heading{top:36%;left:34%;width:32%}.photo-hall .hall-heading h2{font-size:clamp(16px,1.45vw,24px);margin-top:5px;line-height:1.08}.photo-hall .hall-heading h2 br{display:none}.photo-hall .hall-heading h2 em{font-size:1em}.photo-hall .hall-heading .eyebrow{font-size:7px}.photo-hall .threshold .mechanism{width:35%;left:32.5%}
+@media(prefers-reduced-motion:reduce){.photo-hall .swing-leaf,.photo-hall .hover-invite{transition:none}}
+.photo-hall .hall-heading{top:calc(var(--hall-top,0px) + var(--hall-height,100vh)*.36)}
+/* Sliding leaves stay inside the doorway: no hinge, no perspective change on hover. */
+.photo-hall .door-opening{overflow:hidden;perspective:none}
+.photo-hall .slide-half{position:absolute;top:0;bottom:0;width:50%;overflow:hidden;transition:transform .8s cubic-bezier(.22,.7,.2,1);transform:translateX(0)}
+.photo-hall .slide-left{left:0}.photo-hall .slide-right{right:0}
+.photo-hall .sliding-face{position:absolute;top:0;bottom:0;width:200%;display:block;left:0}
+.photo-hall .slide-right .sliding-face{left:-100%}
+.photo-hall .slide-left:after,.photo-hall .slide-right:after{content:'';position:absolute;top:0;bottom:0;width:2px;background:#080d14b3;z-index:4}
+.photo-hall .slide-left:after{right:0}.photo-hall .slide-right:after{left:0}
+.photo-hall .room-link:hover .slide-left,.photo-hall .room-link:focus-visible .slide-left{transform:translateX(-96%)}
+.photo-hall .room-link:hover .slide-right,.photo-hall .room-link:focus-visible .slide-right{transform:translateX(96%)}
+.photo-hall .door-plaque{transform:none}.photo-hall .hover-invite{bottom:4%;font-size:12px;left:7%;right:7%}
+@media(prefers-reduced-motion:reduce){.photo-hall .slide-half{transition:none}}
+
+/* Game-art revision: one complete image per door is clipped into two leaves.
+   Both leaves therefore meet at the same x=50% seam without image retouching. */
+.game-hall .side-access{width:360px;height:540px}
+.game-hall .antique .door-material{background-image:url('../assets/game-v2/door-rouages-v2.jpg');background-size:100% 100%;background-position:center;border:0}
+.game-hall .laboratory .door-material{background-image:url('../assets/game-v2/door-cybertrax-v2.jpg');background-size:100% 100%;background-position:center;border:0}
+.game-hall .hall-heading{top:calc(var(--hall-top,0px) + var(--hall-height,100vh)*.205);left:37%;width:26%}
+.game-hall .hall-heading h2{font-size:clamp(17px,1.65vw,27px);line-height:1.08}
+.game-hall .hall-photo-shade{background:linear-gradient(0deg,#050c1770,transparent 18%,transparent 90%)}
+.game-hall .door-plaque{left:11%;right:11%;top:14%;padding:14px 6px 15px;background:linear-gradient(130deg,#1c140de9,#39291fe8);border-color:#ac7a3d;box-shadow:0 5px 16px #0008,inset 0 0 0 3px #22180f,inset 0 0 0 4px #9e753f}
+.game-hall .plaque-title{font-size:25px;line-height:1.12}
+.game-hall .plaque-index{font-size:8px;margin-bottom:9px}
+.game-hall .plaque-rule{margin-top:12px}
+.game-hall .laboratory .door-plaque{top:15%;background:linear-gradient(130deg,#0a192be9,#152e47ec);border-color:#5d9fbf}
+.game-hall .laboratory .plaque-title{font-size:29px;color:#99d9ec;text-shadow:0 0 12px #449dc958}
+.game-hall .laboratory .plaque-title>span{color:#ff9f53}
+.game-hall .hover-invite{background:#0a1722ed;border-color:#d68a4280}
+.game-hall .threshold{border-color:#9a582c;box-shadow:0 0 0 2px #172533,0 7px 18px #0009}

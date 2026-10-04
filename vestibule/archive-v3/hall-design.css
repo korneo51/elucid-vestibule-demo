@@ -1,0 +1,41 @@
+/* Four independent layers: room image → sliding leaves → cutaway reception → fixed signs.
+   Apertures and projection share hall-layout.json; no hand-adjusted second geometry. */
+.layered-hall .wall{background:#101b2a}
+.layered-hall .hall-artboard{position:absolute;isolation:isolate}
+.layered-hall .hall-mask-defs{position:absolute}
+.layered-hall .hall-background{position:absolute;inset:0;width:100%;height:100%;max-width:none;z-index:2;clip-path:url(#hall-apertures-v3);pointer-events:none}
+.layered-hall .side-access,.layered-hall .hall-sign{position:absolute;left:0;top:0;right:auto;width:360px;height:540px;transform-origin:0 0;perspective:none}
+.layered-hall .side-access{z-index:1}
+.layered-hall .room-link{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;background:#0b1220;transform:none;box-shadow:none;filter:none;overflow:hidden;isolation:isolate}
+.layered-hall .room-link:before{display:none}
+.layered-hall .room-link:focus-visible{outline:4px solid #f8bb64;outline-offset:-5px}
+.layered-hall .side-access.laboratory{box-shadow:none}
+.layered-hall .portal-room{position:absolute;inset:0;overflow:hidden}
+.layered-hall .portal-room img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 45%;max-width:none}
+.layered-hall .portal-room:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 22px 5px #03091288}
+.layered-hall .door-opening{position:absolute;inset:-.5px;overflow:hidden;pointer-events:none}
+.layered-hall .slide-half{position:absolute;top:0;bottom:0;width:50%;overflow:hidden;transition:transform .7s cubic-bezier(.22,.7,.2,1)}
+.layered-hall .slide-left{left:0}.layered-hall .slide-right{right:0}
+.layered-hall .sliding-face{position:absolute;left:0;top:0;bottom:0;width:200%;background-image:var(--door-art);background-size:100% 100%;background-position:center}
+.layered-hall .slide-right .sliding-face{left:-100%}
+/* No extra dark divider: the native seam in the artwork is sufficient. */
+.layered-hall .room-link:hover .slide-left,.layered-hall .room-link:focus-visible .slide-left{transform:translateX(-100%)}
+.layered-hall .room-link:hover .slide-right,.layered-hall .room-link:focus-visible .slide-right{transform:translateX(100%)}
+.layered-hall .hover-invite{position:absolute;left:5%;right:5%;bottom:5%;padding:13px 6px;background:#0b1624de;color:#f9f1dd;border:1px solid #d7a26588;text-align:center;font-size:18px;opacity:0;transition:opacity .2s;pointer-events:none}
+.layered-hall .hover-invite b{padding-left:12px}
+.layered-hall .room-link:hover .hover-invite,.layered-hall .room-link:focus-visible .hover-invite{opacity:1}
+.layered-hall .hall-sign{z-index:3;pointer-events:none}
+.layered-hall .room-sign{position:absolute;left:-63px;top:-184px;width:486px;height:147px;display:flex;align-items:center;justify-content:center;text-align:center;background:linear-gradient(130deg,#302316,#171510);border:3px solid #d9aa67;box-shadow:0 8px 10px #0006,inset 0 0 0 5px #172132,inset 0 0 0 6px #8c7046;color:#ffe8b8}
+.layered-hall .room-sign>span{font:bold 44px/1.12 Georgia,serif;text-shadow:0 2px 2px #0007}
+.layered-hall .laboratory .room-sign{background:linear-gradient(125deg,#102639,#101c2c);border-color:#66d5e3;box-shadow:0 8px 10px #0006,inset 0 0 0 5px #162338,inset 0 0 0 6px #458cab;color:#b8eaff}
+.layered-hall .laboratory .room-sign>span{font:700 60px/1 Manrope,sans-serif;letter-spacing:-.055em}
+.layered-hall .laboratory .room-sign>span>span{color:#ffb266}
+.layered-hall .hall-heading{z-index:3;top:43%;left:34%;width:32%;text-align:center}
+.layered-hall .hall-heading .eyebrow{font-size:8px;color:#c2d9e4}
+.layered-hall .hall-heading h2{font-size:clamp(18px,1.6vw,27px);color:#e8f1f5;margin-top:8px}
+.layered-hall .hall-label{display:none}
+.layered-hall .threshold{border:3px solid #e48730;box-shadow:0 0 0 4px #162230,0 0 0 8px #ec8424,0 7px 15px #0007}
+.layered-hall .threshold:after{border:none;box-shadow:none}
+.layered-hall .threshold .leaf{background:linear-gradient(100deg,#132130,#263b4c,#142331)}
+.layered-hall .door-mark{color:#e7d1ab;font-size:8px}
+@media(prefers-reduced-motion:reduce){.layered-hall .slide-half,.layered-hall .hover-invite{transition:none}}

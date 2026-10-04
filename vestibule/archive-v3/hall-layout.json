@@ -1,0 +1,27 @@
+{
+  "artWidth": 1672,
+  "artHeight": 941,
+  "background": "../assets/hall-v3/hall-reception-v3.jpg",
+  "portals": [
+    {
+      "id": "left",
+      "room": "rouages",
+      "theme": "antique",
+      "title": "Les rouages<br>de l’apocalypse",
+      "label": "Découvrir Les rouages de l’apocalypse",
+      "corners": [[99,416],[318,490],[314,792],[94,856]],
+      "door": "../assets/game-v2/door-rouages-v2.jpg",
+      "interior": "../assets/game-v2/room-rouages-v2.jpg"
+    },
+    {
+      "id": "right",
+      "room": "cybertrax",
+      "theme": "laboratory",
+      "title": "Cyber<span>traX</span>",
+      "label": "Découvrir CybertraX",
+      "corners": [[1350,490],[1576,416],[1581,857],[1352,792]],
+      "door": "../assets/game-v2/door-cybertrax-v2.jpg",
+      "interior": "../assets/game-v2/room-cybertrax-v2.jpg"
+    }
+  ]
+}

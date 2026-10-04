@@ -1,0 +1,82 @@
+/* Four independent layers: room image → sliding leaves → cutaway reception → fixed signs.
+   Apertures and projection share hall-layout.json; signs have separate wall anchors. */
+.layered-hall .wall{background:#101b2a}
+.layered-hall .hall-artboard{position:absolute;isolation:isolate}
+.layered-hall .hall-mask-defs{position:absolute}
+.layered-hall .hall-background{position:absolute;inset:0;width:100%;height:100%;max-width:none;z-index:2;clip-path:url(#hall-apertures-v3);pointer-events:none}
+.layered-hall .side-access,.layered-hall .hall-sign,.layered-hall .portal-cue{position:absolute;left:0;top:0;right:auto;width:360px;height:540px;transform-origin:0 0;perspective:none}
+.layered-hall .side-access{z-index:1}
+.layered-hall .room-link{position:absolute;inset:0;width:100%;height:100%;padding:0;border:0;background:#0b1220;transform:none;box-shadow:none;filter:none;overflow:hidden;isolation:isolate}
+.layered-hall .room-link:before{display:none}
+.layered-hall .room-link:focus-visible{outline:4px solid #f8bb64;outline-offset:-5px}
+.layered-hall .side-access.laboratory{box-shadow:none}
+.layered-hall .portal-room{position:absolute;inset:0;overflow:hidden}
+.layered-hall .portal-room img{display:block;width:100%;height:100%;object-fit:cover;object-position:50% 45%;max-width:none}
+.layered-hall .portal-room:after{content:'';position:absolute;inset:0;box-shadow:inset 0 0 22px 5px #03091288}
+.layered-hall .door-opening{position:absolute;inset:-.5px;overflow:hidden;pointer-events:none}
+.layered-hall .slide-half{position:absolute;top:0;bottom:0;width:50%;overflow:hidden;transition:transform .7s cubic-bezier(.22,.7,.2,1)}
+.layered-hall .slide-left{left:0}.layered-hall .slide-right{right:0}
+.layered-hall .sliding-face{position:absolute;left:0;top:0;bottom:0;width:200%;background-image:var(--door-art);background-size:100% 100%;background-position:center}
+.layered-hall .slide-right .sliding-face{left:-100%}
+/* No extra dark divider: the native seam in the artwork is sufficient. */
+.layered-hall .room-link:hover .slide-left,.layered-hall .room-link:focus-visible .slide-left,.layered-hall .room-link.is-preview .slide-left{transform:translateX(-100%)}
+.layered-hall .room-link:hover .slide-right,.layered-hall .room-link:focus-visible .slide-right,.layered-hall .room-link.is-preview .slide-right{transform:translateX(100%)}
+.layered-hall .hall-sign{width:440px;height:150px;z-index:3;pointer-events:none;backface-visibility:hidden}
+.layered-hall .room-sign{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#ffe7b8;isolation:isolate}
+.layered-hall .room-sign>span{position:relative;z-index:1;font:bold 45px/1.1 Georgia,serif;text-shadow:0 0 5px #ffc56f,0 0 18px #ed9a5588,0 2px 2px #000b}
+.layered-hall .laboratory .room-sign>span{font:700 61px/1 Manrope,sans-serif;letter-spacing:-.055em;text-shadow:0 0 7px #a3f4ff,0 0 20px #1eadd588,0 2px 2px #000b}
+.layered-hall .laboratory .room-sign>span>span{color:#ffb266;text-shadow:0 0 9px #ff9a4e,0 0 20px #ff893588}
+/* Both horizontal edges converge to the same point as the ceiling and floor lines. */
+.layered-hall .hall-sign .room-sign{background:linear-gradient(140deg,#233047,#0b1725 80%);border:4px solid #e9ae68;box-shadow:0 0 0 5px #162539,0 0 0 7px #a9804e99,0 0 17px 8px #ffab4b77,inset 0 0 0 5px #8c6943,inset 0 0 28px #efac5655}
+.layered-hall .hall-sign .room-sign:after{content:'';position:absolute;inset:11px;border:1px solid #e8bc7977}
+.layered-hall .hall-sign.laboratory .room-sign{background:linear-gradient(140deg,#14334c,#091c2d 80%);border-color:#82e9f2;box-shadow:0 0 0 5px #102c42,0 0 0 7px #65cdda99,0 0 18px 9px #4ad8ee77,inset 0 0 0 5px #397c9a,inset 0 0 28px #4bd9f466}
+.layered-hall .hall-sign.laboratory .room-sign:after{border-color:#8ce4ef77}
+/* These cues lie on the two receding side walls, not on the camera plane. */
+.layered-hall .portal-cue{width:220px;height:110px;z-index:4;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:0;padding:0;border:0;background:none;box-shadow:none;filter:none;color:#f5c68a;opacity:0;pointer-events:none;backface-visibility:hidden;transition:opacity .35s,filter .25s;cursor:pointer}
+.layered-hall.cue-active .portal-cue{opacity:1;pointer-events:auto;animation:cue-pulse 1.5s ease-in-out infinite}
+.layered-hall .portal-cue.laboratory{color:#9bedf8}
+.layered-hall .portal-cue span{font:700 19px/1 Manrope,sans-serif;letter-spacing:.09em;text-shadow:0 0 8px currentColor,0 2px 4px #000b}
+.layered-hall .portal-cue .cue-mobile{display:none}
+.layered-hall .portal-cue svg{display:block;width:200px;height:72px;overflow:visible;filter:drop-shadow(0 0 5px currentColor)}
+.layered-hall .portal-cue path{fill:none;stroke:currentColor;stroke-width:6;stroke-linecap:round;stroke-linejoin:round}
+.layered-hall .portal-cue:hover,.layered-hall .portal-cue:focus-visible{filter:brightness(1.35)}
+.layered-hall.cue-active .portal-cue:hover,.layered-hall.cue-active .portal-cue:focus-visible{animation:none;opacity:1}
+.layered-hall .portal-cue:focus-visible{outline:3px solid currentColor;outline-offset:4px}
+@keyframes cue-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.mobile-pan-hint{display:none}
+.layered-hall .tilt-control{display:none}
+.layered-hall.look-active .tilt-control{pointer-events:auto}
+.layered-hall .hall-label{display:none}
+.viewport.is-hall .route-guide{opacity:0}
+.route-guide{transition:opacity .25s}
+.layered-hall .threshold{border:3px solid #e48730;box-shadow:0 0 0 4px #162230,0 0 0 8px #ec8424,0 7px 15px #0007}
+.layered-hall .threshold:after{border:none;box-shadow:none}
+.layered-hall .threshold .leaf{background:linear-gradient(100deg,#132130,#263b4c,#142331)}
+.layered-hall .door-mark{bottom:-35px;color:#e7d1ab;font-size:11px;letter-spacing:.1em;opacity:.88;text-shadow:0 2px 8px #020916}
+.rouages-dialog .dialog-art{background:#241b16}
+.rouages-dialog .dialog-art img{object-fit:contain}
+@media(max-width:760px){
+ .viewport.is-hall{touch-action:pan-y}
+ .layered-hall .portal-cue .cue-desktop{display:none}
+ .layered-hall .portal-cue .cue-mobile{display:inline}
+ .layered-hall .portal-cue.left{margin-left:-30px}
+ .layered-hall .portal-cue.right{margin-left:30px}
+ .layered-hall .mobile-pan-hint{position:absolute;z-index:8;display:block;left:0;right:0;bottom:7%;text-align:center;font:700 11px/1.2 Manrope,sans-serif;letter-spacing:.12em;color:#f3e1c3;text-shadow:0 2px 8px #000;pointer-events:none}
+ .layered-hall:not(.look-active) .mobile-pan-hint{opacity:0}
+ .layered-hall .mobile-pan-hint small{display:block;margin-top:8px;font-size:9px;letter-spacing:.14em;color:#b8c5d2}
+ .layered-hall .tilt-control{position:absolute;z-index:9;display:block;left:50%;bottom:1.5%;transform:translateX(-50%);width:max-content;max-width:92%;min-height:40px;padding:10px 16px;border:1px solid #b5d9e077;border-radius:24px;background:#0d1c2ccc;color:#bce8ef;font:700 10px/1.1 Manrope,sans-serif;letter-spacing:.08em;cursor:pointer;opacity:.9}
+ .layered-hall .tilt-control[aria-pressed="true"]{border-color:#90f2ff;color:#fff;box-shadow:0 0 10px #4ad8ee77}
+ .layered-hall:not(.look-active) .tilt-control{opacity:0;pointer-events:none}
+}
+@media(max-width:760px){.foyer .scene-copy{top:56%;left:7%;width:86%}.foyer .scene-copy h1{font-size:48px}.foyer .lead{font-size:21px}.foyer .door-mark{font-size:11px;bottom:-37px}.route-guide{display:none}.room-dialog{width:calc(100vw - 20px);height:calc(100svh - 20px);max-height:none}.room-dialog[open]{grid-template-columns:1fr;grid-template-rows:42svh auto}.dialog-art{height:42svh;min-height:0}.dialog-copy{align-self:start;padding:24px}.dialog-copy h2{font-size:32px;margin:12px 0}.dialog-close{top:12px;right:12px}}
+@media(prefers-reduced-motion:reduce){.layered-hall .slide-half,.layered-hall .portal-cue{transition:none;animation:none}}
+/* v12 — practical navigation: header stays reachable, real actions in room sheets */
+.skip-link{position:fixed;left:12px;top:-64px;z-index:200;padding:10px 14px;background:#e4b27b;color:#111b28;font-size:12px;font-weight:700;transition:top .15s}.skip-link:focus{top:12px}
+.site-header{position:fixed;transition:background .25s,box-shadow .25s}html.header-solid .site-header{background:#0a101b!important;box-shadow:0 1px 0 #ffffff14}
+.site-header nav a{text-shadow:0 1px 8px #02060d}.site-header .reserve{background:#0b1220cc;color:#f0c898;border-color:#dca46b99;text-shadow:none}.site-header .reserve:hover,.site-header .reserve:focus-visible{background:#e0a96f;color:#111b28}
+@media(min-width:761px){.site-header{background:linear-gradient(#080d14a6,#080d1400)}}
+.room-facts{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:24px 0 0;padding:0}.room-facts li{padding:7px 13px;border:1px solid #d9b58e55;border-radius:20px;background:#ffffff08;color:#e8c9a0;font-size:11px;letter-spacing:.05em}
+.dialog-copy .ee-button{margin-top:26px}
+.rouages-dialog .dialog-art img{object-fit:cover;object-position:50% 38%}
+/* Full-screen backdrop blur made opening a room sheet drop frames; a slightly more opaque scrim looks the same. */
+.room-dialog::backdrop{background:#02060bf5;backdrop-filter:none}

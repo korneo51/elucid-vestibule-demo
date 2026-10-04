@@ -1,0 +1,35 @@
+# Publishes the standalone test page (phone + desktop) to the gh-pages branch, which GitHub Pages can serve.
+# One-time setup in the repository: Settings > Pages > Source "Deploy from a branch" > gh-pages / (root).
+name: Maquette en ligne (GitHub Pages)
+
+on:
+  push:
+    branches: [claude/funny-mccarthy-bqse44]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: maquette-pages
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build the self-contained site
+        run: |
+          python3 vestibule/build-test-site.py --out _site --document --style a
+          rm -f _site/index.wrapped.html
+          touch _site/.nojekyll
+      - name: Publish to the gh-pages branch
+        run: |
+          cd _site
+          git init -q -b gh-pages
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -m "Maquette en ligne (${GITHUB_SHA::7})"
+          git push -f "https://x-access-token:${{ github.token }}@github.com/${{ github.repository }}.git" gh-pages

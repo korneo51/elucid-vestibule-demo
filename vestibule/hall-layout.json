@@ -1,0 +1,34 @@
+{
+  "artWidth": 1672,
+  "artHeight": 941,
+  "vanishingPoint": [836, 635],
+  "background": "../assets/v12/hall.webp",
+  "portals": [
+    {
+      "id": "left",
+      "room": "rouages",
+      "theme": "antique",
+      "title": "Les rouages<br>de l’apocalypse",
+      "label": "Découvrir Les rouages de l’apocalypse",
+      "mobileTitle": "Les rouages<br>de l’apocalypse",
+      "corners": [[99,416],[318,490],[314,792],[94,856]],
+      "sign": {"nearX": 69, "farX": 373, "top": 192, "bottom": 310},
+      "cue": {"nearX": 345, "farX": 515, "top": 435, "bottom": 610},
+      "door": "../assets/v12/door-rouages.webp",
+      "interior": "../assets/v12/room-rouages.webp"
+    },
+    {
+      "id": "right",
+      "room": "cybertrax",
+      "theme": "laboratory",
+      "title": "Cyber<span>traX</span>",
+      "label": "Découvrir CybertraX",
+      "mobileTitle": "CybertraX",
+      "corners": [[1350,490],[1576,416],[1581,857],[1352,792]],
+      "sign": {"nearX": 1603, "farX": 1299, "top": 192, "bottom": 310},
+      "cue": {"nearX": 1327, "farX": 1157, "top": 435, "bottom": 610},
+      "door": "../assets/v12/door-cybertrax.webp",
+      "interior": "../assets/v12/room-cybertrax.webp"
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Elucid — Les passages · Maquette</title>
+  <link rel="preload" as="font" href="assets/manrope-latin.woff2" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="passages.css"><script src="passages.js" defer></script>
+</head>
+<body>
+<main id="passages" data-style="matter">
+  <header class="masthead"><a class="brand" href="#entree" aria-label="Elucid Escape, retour à l’entrée"><img src="assets/logo.svg" width="210" height="80" alt="Elucid Escape"></a><button class="skip" type="button" data-go="0.43">Les univers <span aria-hidden="true">↗</span></button></header>
+  <div class="journey" id="entree">
+    <div class="stage">
+      <section class="scene scene-one" aria-labelledby="room-one-title">
+        <img class="room-photo" src="assets/rouages-1440.webp" width="1440" height="1081" alt="Les objets et énigmes des Rouages de l’Apocalypse">
+        <div class="photo-shade"></div>
+        <div class="room-copy"><p class="eyebrow">01 — LES ROUAGES DE L’APOCALYPSE</p><h2 id="room-one-title">Un premier pas.<br><em>Mille questions.</em></h2><p class="subline">Chaque détail est une piste.</p><button class="text-button" type="button" data-go="0.61">Poursuivre l’exploration <span aria-hidden="true">↗</span></button></div>
+      </section>
+      <section class="scene scene-two" aria-labelledby="room-two-title">
+        <div class="cyber-lines" aria-hidden="true"></div>
+        <img class="cyber-art" src="assets/cybertrax-1440.webp" width="550" height="367" alt="CybertraX" loading="lazy">
+        <div class="room-copy"><p class="eyebrow">02 — CYBERTRAX · PROCHAINEMENT</p><h2 id="room-two-title">Un autre monde.<br><em>À découvrir.</em></h2><button class="text-button" type="button" data-go="0">Revenir à l’entrée <span aria-hidden="true">↶</span></button></div>
+      </section>
+      <div class="foyer" aria-hidden="true"><div class="wall-line wall-line-one"></div><div class="wall-line wall-line-two"></div><div class="floor"></div><div class="floor-light"></div></div>
+      <div class="next-veil" aria-hidden="true"></div>
+      <div class="gateway gateway-one" aria-hidden="true">
+        <div class="gate-shadow"></div><div class="gate-number">01<span>LE PREMIER PASSAGE</span></div>
+        <div class="gate-frame"><div class="gate-depth"></div><div class="gate-interior first-interior"></div><div class="gate-door door-left"><i></i><b></b></div><div class="gate-door door-right"><i></i><b></b></div><div class="gate-seam"></div>
+          <div class="lock"><svg viewBox="0 0 180 180" fill="none"><circle cx="90" cy="90" r="83"/><circle class="lock-dashes" cx="90" cy="90" r="72"/><path class="lock-arc" d="M90 27 A63 63 0 0 1 153 90 M90 153 A63 63 0 0 1 27 90"/><path class="lock-inner" d="M90 54 126 90 90 126 54 90Z"/><path d="M90 79v22 M79 90h22"/></svg></div>
+        </div><div class="gate-sill"></div>
+      </div>
+      <div class="gateway gateway-two" aria-hidden="true">
+        <div class="gate-shadow"></div><div class="gate-number">02<span>UN NOUVEL UNIVERS</span></div>
+        <div class="gate-frame"><div class="gate-depth"></div><div class="gate-interior second-interior"></div><div class="gate-door door-left"><i></i><b></b></div><div class="gate-door door-right"><i></i><b></b></div><div class="gate-seam"></div>
+          <div class="lock"><svg viewBox="0 0 180 180" fill="none"><circle cx="90" cy="90" r="83"/><circle class="lock-dashes" cx="90" cy="90" r="72"/><path class="lock-arc" d="M90 27 A63 63 0 0 1 153 90 M90 153 A63 63 0 0 1 27 90"/><path class="lock-inner" d="M90 54 126 90 90 126 54 90Z"/><path d="M90 79v22 M79 90h22"/></svg></div>
+        </div><div class="gate-sill"></div>
+      </div>
+      <section class="intro" aria-labelledby="intro-title"><p class="eyebrow">CHÂLONS-EN-CHAMPAGNE · ESCAPE GAME</p><h1 id="intro-title">ELUCID <br>ESCAPE<span>.</span></h1><p class="invitation">La curiosité ouvre <br>toutes les portes.</p><button class="enter" type="button" data-go="0.43">Franchir le passage <span aria-hidden="true">↗</span></button></section>
+      <div class="next-copy" aria-hidden="true"><p class="eyebrow">L’EXPLORATION CONTINUE</p><p>Derrière chaque porte,<br><em>un nouvel univers.</em></p></div>
+      <div class="scroll-cue"><span class="cue-line"></span><span id="cue-text">Faites défiler pour ouvrir</span><span aria-hidden="true">↓</span></div>
+      <nav class="chapter-nav" aria-label="Étapes de l’exploration"><button type="button" data-go="0" aria-label="L’entrée" aria-current="step"><span>00</span><i></i></button><button type="button" data-go="0.43" aria-label="Les Rouages"><span>01</span><i></i></button><button type="button" data-go="0.96" aria-label="CybertraX"><span>02</span><i></i></button></nav>
+      <div class="progress-track" aria-hidden="true"><div></div></div>
+    </div>
+  </div>
+  <aside class="demo-controls" aria-label="Comparaison des deux maquettes"><span class="demo-label">ÉTUDE DE PASSAGE</span><div class="variant-buttons" role="group" aria-label="Style du passage"><button type="button" data-variant="matter" aria-pressed="true">Porte à relief</button><button type="button" data-variant="graphic" aria-pressed="false">Portail graphique</button></div><button class="replay" type="button" data-go="0" aria-label="Rejouer le parcours">↶ <span>Rejouer</span></button></aside>
+  <noscript><p class="no-script">Les animations sont désactivées. Les deux univers restent présentés ci-dessus.</p></noscript>
+</main>
+</body>
+</html>
