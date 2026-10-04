@@ -19,13 +19,24 @@ Maquette de test uniquement. Suite de `MOBILE-V14.md` et de `VOYAGES.md` : le st
 | Hall | Le sceau de la porte du fond se tourne du doigt (ou on touche une icône). L'enseigne au-dessus affiche « Votre destination : Tarifs » et sa phrase. Le gros bouton « ENTRER » y mène. Deux plaques au sol, « Les Rouages » et « CybertraX », tournent la vue vers une porte (le balayage fonctionne toujours). |
 | Porte des Rouages | On tourne le grand engrenage (un demi-tour environ) : les battants s'ouvrent, puis la fiche de la salle monte. Toucher l'engrenage joue tout seul. |
 | Porte de CybertraX | On fait monter l'énergie le long du joint de la porte (un seul glissé vers le haut) : les battants s'ouvrent, puis la fiche monte. Toucher le bouton joue tout seul. |
-| Tarifs | Le tableau des cinq tarifs (par personne et par session) et le bouton « Choisir mon créneau » en haut. Dessous, un mur noir : on y passe la lampe UV du doigt (ou on le touche, la lampe se promène seule) ; des mots cachés apparaissent en violet, et une clé. |
-| Cadeaux | La carte cadeau et son bouton « Offrir une carte cadeau » d'abord. Dessous, un cryptex à six anneaux : on tourne les lettres (toucher ou glisser) pour écrire le mot de la devinette, la clé sort. |
+| Tarifs | Le tableau des cinq tarifs (par personne et par session) et le bouton « Choisir mon créneau » en haut. Le bouton « Allumer la lampe UV » éteint la pièce : le doigt promène la lampe n'importe où (ou on touche et elle fouille seule). Des mots cachés apparaissent en violet, dont le mot de passe du standard, et une clé qui change de place à chaque visite. |
+| Cadeaux | La carte cadeau et son bouton « Offrir une carte cadeau » d'abord. Dessous, un cryptex à six anneaux gravé d'un message chiffré (5 · 14 · 9 · 7 · 13 · 5) avec l'alphabet numéroté (A = 1, B = 2…) : on déchiffre le mot, on tourne les anneaux (toucher ou glisser), la clé sort. |
 | Avis | Dossier à deux pages : flèches ou balayage, « Lire la suite » ouvre l'avis complet. Une clé est glissée entre les pages, à la dernière. |
 | Questions | Les réponses du site, avec un instrument par question : loquet à glisser, curseur d'âge, frise de la partie, jauge de difficulté, interrupteur de lumière. Éteindre la lumière dans « Effrayé ? » fait briller une clé dans le noir. |
-| Contact | Adresse, téléphone, mail et réseaux d'abord. Dessous, un téléphone à touches qui fait entendre les tonalités. « Appeler » compose le numéro. Le mot de passe affiché sur le pense-bête (6 9 0 #) fait sortir une clé du retour de monnaie. |
+| Contact | Adresse, téléphone, mail et réseaux d'abord. Dessous, un téléphone à touches qui fait entendre les tonalités ; « Appeler » compose le numéro. Le pense-bête dit que le maître du jeu ne décroche que pour ceux qui savent lire dans le noir : le mot de passe (6 9 0 #) est écrit à la lampe UV dans Tarifs. Bon code : une clé sort du retour de monnaie. |
 
 Navigation entre les pièces : bouton « Hall » en haut, deux grosses plaques en bas qui portent le nom de la pièce précédente et de la suivante (« Réserver » après la dernière).
+
+## Easter eggs
+
+- Composer le numéro d'Elucid Escape (03 26 67 38 01) : « Allô ? Bienvenue chez Elucid Escape, le meilleur escape game de Châlons-en-Champagne ! (en même temps, on est les seuls) », avec un bouton pour appeler pour de vrai.
+- Jouer « Au clair de la lune » sur le clavier (1 1 1 2 3 2 1 3 2 2 1) : « Bravo, vous êtes un super musicien », avec la mélodie.
+- Codes courts, après une pause : 112 / 15 / 17 / 18, 3615, 666, 0000 ou 1234, 42, 007.
+- Questions : basculer l'interrupteur de lumière huit fois de suite : « Court-circuit ! ».
+
+## Décors
+
+Chaque pièce a son décor dessiné (dans l'attente d'illustrations) : salle noire aux tubes UV (Tarifs), salle du coffre (Cadeaux), bibliothèque (Avis), salle de contrôle (Questions), standard téléphonique (Contact). Voir `scenes` dans `decor.js`.
 
 ## Clés et récompense
 
@@ -39,7 +50,8 @@ Les prix, avis, questions et coordonnées sont lus dans le contenu déjà prése
 
 - La pièce « L'équipe » n'a pas de machine : elle n'apparaît pas.
 - L'entrée (verrou à glisser) est inchangée.
-- La devinette du cryptex est volontairement simple ; elle se change dans `buildGift` de `decor.js`.
+- L'énigme du cryptex et celle du téléphone sont volontairement courtes ; elles se règlent dans `buildGift` et `buildContact` de `decor.js`.
+- Événements, professionnels et pages légales : voir `SITE-INVENTAIRE.md`.
 
 ## Fichiers
 

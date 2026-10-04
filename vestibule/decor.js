@@ -58,11 +58,77 @@
 
  // ---------- pièces : cadre commun ----------
  const layer=document.createElement('div');layer.className='d-rooms';layer.setAttribute('aria-hidden','true');app.append(layer);
+ // ---------- un décor par pièce (dessiné, dans l'attente de vraies illustrations) ----------
+ function seeded(seed){let s=seed;return()=>{s=(s*9301+49297)%233280;return s/233280}}
+ const sceneOpen='<svg viewBox="0 0 393 780" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" aria-hidden="true"><defs><filter id="sb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter></defs>';
+ const scenes=[
+  // 0 · Tarifs : la salle noire, tubes UV au plafond, symboles à demi effacés
+  ()=>{
+   let s=sceneOpen+'<defs><radialGradient id="uvg" cx=".5" cy="0" r="1"><stop offset="0" stop-color="#8d2bff" stop-opacity=".34"/><stop offset="1" stop-color="#8d2bff" stop-opacity="0"/></radialGradient><linearGradient id="uvb" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#090e1c"/><stop offset="1" stop-color="#160a2b"/></linearGradient></defs><rect width="393" height="780" fill="url(#uvb)"/>';
+   [62,196,330].forEach(x=>{s+='<path d="M'+(x-26)+' 74L'+(x+26)+' 74L'+(x+120)+' 470L'+(x-120)+' 470Z" fill="url(#uvg)"/><rect x="'+(x-36)+'" y="64" width="72" height="9" rx="4.5" fill="#b84bff" opacity=".8" filter="url(#sb)"/><rect x="'+(x-36)+'" y="64" width="72" height="9" rx="4.5" fill="#e6c4ff"/><path d="M'+(x-20)+' 0V64M'+(x+20)+' 0V64" stroke="#2a2147" stroke-width="2"/>'});
+   s+='<g stroke="#8d2bff" stroke-opacity=".2" stroke-width="1.2">';
+   for(let i=-8;i<=8;i++)s+='<path d="M196 560L'+(196+i*80)+' 780"/>';
+   [590,625,670,735].forEach(y=>{s+='<path d="M0 '+y+'H393"/>'});
+   s+='</g><g fill="none" stroke="#b84bff" stroke-opacity=".26" stroke-width="2"><circle cx="330" cy="560" r="22"/><path d="M330 538V582M308 560H352"/><path d="M40 600l30-18 4 18"/><path d="M52 520q14-26 30 0t30 0"/></g><text x="318" y="170" font-family="Courier New" font-weight="700" font-size="26" fill="#b84bff" fill-opacity=".18">?</text><text x="22" y="470" font-family="Courier New" font-weight="700" font-size="20" fill="#b84bff" fill-opacity=".16">∞ ✶ ∴</text>';
+   return s+'</svg>';
+  },
+  // 1 · Cadeaux : la salle du coffre, grande porte ronde derrière la carte
+  ()=>{
+   let s=sceneOpen+'<defs><radialGradient id="vg" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#e8832a" stop-opacity=".30"/><stop offset="1" stop-color="#e8832a" stop-opacity="0"/></radialGradient></defs><rect width="393" height="780" fill="#080e1a"/><rect width="393" height="780" fill="url(#vg)"/>';
+   s+='<g transform="translate(196 330)"><circle r="196" fill="#0d1a2d" stroke="#1d3a5a" stroke-width="10"/><circle r="168" fill="none" stroke="#2a4a70" stroke-width="3"/>';
+   for(let i=0;i<20;i++){const a=i*18*Math.PI/180;s+='<circle cx="'+(Math.cos(a)*182).toFixed(1)+'" cy="'+(Math.sin(a)*182).toFixed(1)+'" r="6" fill="#16304f" stroke="#2f5478"/>'}
+   s+='<circle r="120" fill="#0b1626" stroke="#e8832a" stroke-opacity=".5" stroke-width="3"/>';
+   for(let i=0;i<6;i++){s+='<path d="M0 0L'+(Math.cos(i*Math.PI/3)*112).toFixed(1)+' '+(Math.sin(i*Math.PI/3)*112).toFixed(1)+'" stroke="#e8832a" stroke-opacity=".4" stroke-width="9" stroke-linecap="round"/>'}
+   s+='<circle r="30" fill="#14284a" stroke="#e8832a" stroke-opacity=".7" stroke-width="3"/></g>';
+   s+='<g fill="none" stroke="#3b6a8c" stroke-opacity=".55" stroke-width="3" stroke-dasharray="9 5"><path d="M-10 90Q120 250 180 140"/><path d="M403 80Q270 240 215 140"/><path d="M-10 650Q130 520 200 600"/><path d="M403 640Q260 510 190 590"/></g>';
+   s+='<g stroke="#e8832a" stroke-opacity=".12" stroke-width="1.2"><path d="M0 700H393M0 740H393"/></g>';
+   return s+'</svg>';
+  },
+  // 2 · Avis : la bibliothèque aux témoignages
+  ()=>{
+   const rnd=seeded(7);let s=sceneOpen+'<defs><radialGradient id="lm" cx=".5" cy=".1" r=".9"><stop offset="0" stop-color="#ffb95e" stop-opacity=".28"/><stop offset="1" stop-color="#ffb95e" stop-opacity="0"/></radialGradient></defs><rect width="393" height="780" fill="#0a1220"/><rect width="393" height="780" fill="url(#lm)"/>';
+   const cols=['#14284a','#1d3b66','#2a2547','#4a2f12','#15363a','#3a2314'];
+   [[0,92],[301,92]].forEach(([x0,w])=>{
+    for(let row=0;row<6;row++){
+     const y=150+row*100;let x=x0+4;
+     while(x<x0+w-8){const bw=6+rnd()*9,bh=58+rnd()*34;s+='<rect x="'+x.toFixed(1)+'" y="'+(y+92-bh).toFixed(1)+'" width="'+bw.toFixed(1)+'" height="'+bh.toFixed(1)+'" fill="'+cols[Math.floor(rnd()*cols.length)]+'" stroke="#050a12" stroke-width="1"/>';x+=bw+1}
+     s+='<rect x="'+x0+'" y="'+(y+92)+'" width="'+w+'" height="7" fill="#2a1d10"/>';
+    }
+   });
+   s+='<path d="M120 0V60M273 0V60" stroke="#2a2147" stroke-width="2"/><g transform="translate(196 92)"><path d="M-50 -12L50 -12L34 26L-34 26Z" fill="#1a1206" stroke="#e8832a" stroke-opacity=".7" stroke-width="2"/><ellipse cy="26" rx="40" ry="7" fill="#ffb95e" opacity=".5" filter="url(#sb)"/></g>';
+   s+='<g fill="#ffcf8a" fill-opacity=".35"><circle cx="150" cy="300" r="1.6"/><circle cx="250" cy="380" r="1.4"/><circle cx="210" cy="520" r="1.8"/><circle cx="170" cy="640" r="1.3"/></g>';
+   return s+'</svg>';
+  },
+  // 3 · Questions : la salle de contrôle, écrans, cadrans et voyants
+  ()=>{
+   const rnd=seeded(11);let s=sceneOpen+'<rect width="393" height="780" fill="#07111d"/>';
+   for(let r=0;r<2;r++)for(let c=0;c<3;c++){
+    const x=12+c*126,y=66+r*96;s+='<rect x="'+x+'" y="'+y+'" width="116" height="84" rx="6" fill="#06101b" stroke="#2f5478" stroke-width="2"/><path d="M'+(x+8)+' '+(y+60)+' ';
+    for(let i=1;i<=10;i++)s+='L'+(x+8+i*10)+' '+(y+42+Math.sin(i*1.3+r+c)*16).toFixed(1)+' ';
+    s+='" fill="none" stroke="'+(c===1?'#e8832a':'#62e4f5')+'" stroke-opacity=".5" stroke-width="2"/>';
+   }
+   s+='<g>';
+   for(let i=0;i<5;i++){const x=34+i*82,y=620;s+='<circle cx="'+x+'" cy="'+y+'" r="26" fill="#0a1626" stroke="#2f5478" stroke-width="3"/><path d="M'+x+' '+y+'L'+(x+Math.cos(rnd()*5)*18).toFixed(1)+' '+(y+Math.sin(rnd()*5)*18).toFixed(1)+'" stroke="#ffcf8a" stroke-opacity=".7" stroke-width="3" stroke-linecap="round"/>'}
+   s+='</g><g>';
+   for(let i=0;i<14;i++){const x=24+i*26,on=rnd()>.55;s+='<circle cx="'+x+'" cy="700" r="4" fill="'+(on?(rnd()>.5?'#e8832a':'#62e4f5'):'#16304f')+'" '+(on?'filter="url(#sb)"':'')+'/><circle cx="'+x+'" cy="700" r="3" fill="'+(on?(rnd()>.5?'#ffb95e':'#9defff'):'#1d3a5a')+'"/>'}
+   s+='</g><g fill="none" stroke="#2f5478" stroke-opacity=".6" stroke-width="3"><path d="M20 270Q60 330 40 400T70 520"/><path d="M372 280Q330 350 350 420T320 540"/></g>';
+   return s+'</svg>';
+  },
+  // 4 · Contact : le standard téléphonique, prises et cordons
+  ()=>{
+   const rnd=seeded(5);let s=sceneOpen+'<rect width="393" height="780" fill="#08111e"/><rect x="14" y="60" width="365" height="250" rx="10" fill="#0a1626" stroke="#2f5478" stroke-width="2"/>';
+   for(let r=0;r<5;r++)for(let c=0;c<12;c++){const x=34+c*28.5,y=84+r*44;s+='<circle cx="'+x+'" cy="'+y+'" r="8" fill="#050c16" stroke="#3b6a8c" stroke-width="1.6"/><circle cx="'+x+'" cy="'+(y+16)+'" r="2.4" fill="'+(rnd()>.7?'#e8832a':'#1d3a5a')+'"/>'}
+   s+='<g fill="none" stroke-width="3.5" stroke-linecap="round"><path d="M62 84Q100 160 148 128" stroke="#e8832a" stroke-opacity=".6"/><path d="M233 172Q262 250 320 216" stroke="#62e4f5" stroke-opacity=".6"/><path d="M90 216Q160 290 206 214" stroke="#ffcf8a" stroke-opacity=".5"/><path d="M290 84Q330 140 346 100" stroke="#62e4f5" stroke-opacity=".45"/></g>';
+   s+='<g transform="translate(196 640)"><path d="M-140 0C-140 -70 -100 -92 -60 -92H60C100 -92 140 -70 140 0" fill="none" stroke="#2f5478" stroke-width="10" stroke-linecap="round"/><rect x="-156" y="-26" width="34" height="56" rx="14" fill="#14284a" stroke="#62e4f5" stroke-opacity=".6" stroke-width="2"/><rect x="122" y="-26" width="34" height="56" rx="14" fill="#14284a" stroke="#62e4f5" stroke-opacity=".6" stroke-width="2"/></g>';
+   s+='<circle cx="60" cy="740" r="4" fill="#e8832a" filter="url(#sb)"/><circle cx="60" cy="740" r="3" fill="#ffb95e"/>';
+   return s+'</svg>';
+  }
+ ];
  const roomEls=[];let current=-1;const enterHooks={};
  defs.forEach((def,index)=>{
   const prev=index===0?{name:'Hall',id:'m-hall'}:defs[index-1],last=index===N-1;
   const el=document.createElement('section');el.className='d-room';el.setAttribute('aria-label',def.name);el.inert=true;
-  el.innerHTML='<div class="d-top"><button class="d-hall" type="button" data-room="m-hall" aria-label="Retour au hall">⌂ Hall</button><div class="d-title" tabindex="-1"><small>0'+(index+1)+' / 0'+N+'</small><b>'+def.plate+'</b></div></div><div class="d-body"></div>'
+  el.innerHTML='<div class="d-scene" aria-hidden="true">'+scenes[index]()+'</div><div class="d-top"><button class="d-hall" type="button" data-room="m-hall" aria-label="Retour au hall">⌂ Hall</button><div class="d-title" tabindex="-1"><small>0'+(index+1)+' / 0'+N+'</small><b>'+def.plate+'</b></div></div><div class="d-body"></div>'
    +'<nav class="d-nav" aria-label="Changer de pièce"><button class="p" type="button" data-room="'+prev.id+'"><i aria-hidden="true">‹</i>'+prev.name+'</button><span class="d-dots" aria-hidden="true">'+defs.map((item,i)=>'<b'+(i===index?' class="on"':'')+'></b>').join('')+'</span>'
    +(last?'<a class="n" href="'+BOOK+'" target="_blank" rel="noopener">Réserver<i aria-hidden="true">↗</i></a>':'<button class="n" type="button" data-room="'+defs[index+1].id+'">'+defs[index+1].name+'<i aria-hidden="true">›</i></button>')+'</nav>';
   layer.append(el);roomEls.push(el);
@@ -86,7 +152,7 @@
  api.setGoHook((id,instant)=>route(id));
  document.addEventListener('keydown',event=>{
   if(event.key!=='Escape')return;
-  const modal=$('.d-modal:not([hidden])');if(modal){modal.hidden=true;return}
+  const modal=$('.d-modal:not([hidden]),.d-egg:not([hidden])');if(modal){modal.hidden=true;return}
   if(current>=0)leave();
  });
 
@@ -160,7 +226,20 @@
   element.addEventListener('pointerup',end);element.addEventListener('pointercancel',end);
  }
 
- // ---------- 1. tarifs : le tableau d'abord, puis la lumière noire ----------
+  // ---------- petites fenêtres des secrets (easter eggs) ----------
+ const eggEl=document.createElement('div');eggEl.className='d-egg';eggEl.hidden=true;eggEl.setAttribute('role','dialog');eggEl.setAttribute('aria-modal','true');
+ eggEl.innerHTML='<div class="d-egg-card"><i class="d-egg-ic" aria-hidden="true"></i><h4></h4><p></p><small></small><div class="d-egg-btns"></div></div>';
+ layer.append(eggEl);
+ function egg(icon,title,text,small,actions){
+  eggEl.querySelector('.d-egg-ic').textContent=icon;eggEl.querySelector('h4').textContent=title;eggEl.querySelector('p').textContent=text;eggEl.querySelector('small').textContent=small||'';
+  const buttons=eggEl.querySelector('.d-egg-btns');buttons.innerHTML='';
+  (actions||[]).forEach(action=>{const link=document.createElement('a');link.className='d-egg-go';link.href=action.href;link.textContent=action.label;buttons.append(link)});
+  const close=document.createElement('button');close.type='button';close.className='d-egg-x';close.textContent='Fermer';close.addEventListener('click',()=>{eggEl.hidden=true});buttons.append(close);
+  eggEl.hidden=false;api.buzz([10,30,10]);close.focus({preventScroll:true});
+ }
+ eggEl.addEventListener('click',event=>{if(event.target===eggEl)eggEl.hidden=true});
+
+ // ---------- 1. tarifs : le tableau d'abord, puis la lampe UV pour toute la pièce ----------
  function buildTarifs(body){
   const person='<svg viewBox="0 0 40 56" aria-hidden="true"><circle cx="20" cy="15" r="9"/><path d="M3 54c0-17 7-25 17-25s17 8 17 25z"/></svg>';
   const rows=[2,3,4,5,6].map(n=>{
@@ -169,57 +248,77 @@
   }).join('');
   body.innerHTML='<div class="tb"><div class="tb-h"><span>ÉQUIPE</span><span></span><span>PAR PERS.</span><span>SESSION</span></div>'+rows+'</div>'
    +'<a class="d-ticket" href="'+BOOK+'" target="_blank" rel="noopener"><span>Choisir mon créneau ↗</span><small>Le nombre de joueurs se choisit à la réservation</small></a>'
-   +'<p class="d-bonus">ÉNIGME BONUS · <i>1 CLÉ</i> CACHÉE</p>'
-   +'<div class="uvz" aria-label="Mur noir à explorer à la lampe UV"><div class="uvz-hid"><span>1H30 POUR S’ÉCHAPPER</span><span>DÈS 8 ANS · 2 À 6 JOUEURS</span></div><i class="uvz-beam"></i><p class="uvz-hint">Passez la lampe UV du doigt sur le mur noir</p></div>'
+   +'<button type="button" class="uv-btn" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l8-8M13 11l-3-3 5-5 3 3zM4 20l2-2"/><path d="M17 12l3 1M18 8l3-1M12 18l1 3" opacity=".7"/></svg><span>Allumer la lampe UV</span><i>1 CLÉ CACHÉE</i></button>'
    +'<p class="d-note">* À 2 : un minimum d’expérience · À 6 : la cohésion devient difficile · Plus de 6 : <a href="#" data-room="m-contact">contactez-nous</a></p>';
-  const zone=$('.uvz',body),hidden=$('.uvz-hid',body),key=makeKey(1);hidden.append(key);
-  let fade=0,moved=0,last=null;
+  const room=body.closest('.d-room'),button=$('.uv-btn',body),label=$('span',button);
+  const veil=document.createElement('div');veil.className='uv-layer';veil.hidden=true;
+  // Ce qui n'apparaît qu'à la lumière noire : des mots, le code du téléphone, et la clé (jamais au même endroit).
+  const spots=[[10,78],[82,30],[86,52],[12,42],[72,68]];
+  const spot=spots[Math.floor(Math.random()*spots.length)];
+  veil.innerHTML='<div class="uv-dark"></div><div class="uv-hid"><span style="left:7%;top:23%;transform:rotate(-5deg)">1H30 POUR S’ÉCHAPPER</span><span style="right:8%;top:60%;transform:rotate(4deg)">DÈS 8 ANS</span><span style="left:9%;bottom:19%;transform:rotate(-3deg)">CODE DU MAÎTRE DU JEU : 6 9 0 #</span><span style="right:6%;top:41%;transform:rotate(-8deg);font-size:12px">LES PRIX NE BAISSENT PAS… ENFIN SI</span></div><i class="uv-beam"></i><p class="uv-help">Glissez le doigt : la lampe éclaire partout. Touchez pour la laisser chercher seule.</p>';
+  room.append(veil);
+  const hid=$('.uv-hid',veil),key=makeKey(1);key.style.cssText='position:absolute;left:'+spot[0]+'%;top:'+spot[1]+'%;width:46px;height:46px;margin:-23px 0 0 -23px;border-color:#e3b9ff;background:radial-gradient(circle at 50% 35%,#e9c8ff,#8d2bff);color:#240a4a;box-shadow:0 0 0 5px #8d2bff33,0 0 24px #b84bffaa;pointer-events:none';hid.append(key);
+  let fade=0,last=null,moved=0,on=false;
   function beam(x,y){
-   zone.style.setProperty('--x',x.toFixed(1)+'px');zone.style.setProperty('--y',y.toFixed(1)+'px');zone.style.setProperty('--o','1');zone.classList.add('seen');
-   const k=key.getBoundingClientRect(),z=zone.getBoundingClientRect();
-   key.classList.toggle('on',Math.hypot(k.left+k.width/2-z.left-x,k.top+k.height/2-z.top-y)<60);
+   veil.style.setProperty('--x',x.toFixed(1)+'px');veil.style.setProperty('--y',y.toFixed(1)+'px');veil.classList.add('seen');
+   const k=key.getBoundingClientRect(),v=veil.getBoundingClientRect();
+   if(Math.hypot(k.left+k.width/2-v.left-x,k.top+k.height/2-v.top-y)<70){key.style.pointerEvents='auto';if(key.parentNode===hid)veil.append(key)}
   }
-  function rest(){clearTimeout(fade);fade=setTimeout(()=>{zone.style.setProperty('--o','0');zone.style.setProperty('--x','-200px');zone.style.setProperty('--y','-200px');key.classList.remove('on')},5000)}
   function sweep(){
-   const z=zone.getBoundingClientRect(),k=key.getBoundingClientRect(),tx=k.left+k.width/2-z.left,ty=k.top+k.height/2-z.top,start=performance.now(),duration=calm()?1:1400;
-   const tick=now=>{const t=Math.min(1,(now-start)/duration);beam(tx*t,ty+Math.sin(t*7)*10*(1-t));if(t<1){requestAnimationFrame(tick)}else{beam(tx,ty);rest()}};
+   const v=veil.getBoundingClientRect(),start=performance.now(),duration=calm()?1:4200;
+   const tick=now=>{
+    const t=Math.min(1,(now-start)/duration),lane=Math.floor(t*5),local=(t*5)%1,x=(lane%2===0?local:1-local)*v.width,y=v.height*(.1+lane*.19);
+    beam(x,y);if(t<1)requestAnimationFrame(tick);
+   };
    requestAnimationFrame(tick);
   }
-  const local=event=>{const z=zone.getBoundingClientRect();return[event.clientX-z.left,event.clientY-z.top]};
-  zone.addEventListener('pointerdown',event=>{
+  function setUv(next){
+   on=next;veil.hidden=!on;button.setAttribute('aria-pressed',String(on));label.textContent=on?'Éteindre la lampe UV':'Allumer la lampe UV';room.classList.toggle('uv-on',on);
+   veil.style.setProperty('--x','-300px');veil.style.setProperty('--y','-300px');veil.classList.remove('seen');
+   tone([on?500:300],90,.06);api.buzz(6);
+  }
+  button.addEventListener('click',()=>setUv(!on));
+  const local=event=>{const v=veil.getBoundingClientRect();return[event.clientX-v.left,event.clientY-v.top]};
+  veil.addEventListener('pointerdown',event=>{
    if(event.target.closest('.d-key'))return;
-   clearTimeout(fade);last=local(event);moved=0;beam(last[0],last[1]);try{zone.setPointerCapture(event.pointerId)}catch(error){}
+   last=local(event);moved=0;beam(last[0],last[1]);try{veil.setPointerCapture(event.pointerId)}catch(error){}
   });
-  zone.addEventListener('pointermove',event=>{
-   if(!last)return;const at=local(event);moved+=Math.hypot(at[0]-last[0],at[1]-last[1]);last=at;beam(at[0],at[1]);
-  });
-  const up=event=>{
-   if(!last)return;last=null;try{zone.releasePointerCapture(event.pointerId)}catch(error){}
-   if(moved<8){sweep()}else{rest()}
-  };
-  zone.addEventListener('pointerup',up);zone.addEventListener('pointercancel',up);
+  veil.addEventListener('pointermove',event=>{if(!last)return;const at=local(event);moved+=Math.hypot(at[0]-last[0],at[1]-last[1]);last=at;beam(at[0],at[1])});
+  const up=event=>{if(!last)return;last=null;try{veil.releasePointerCapture(event.pointerId)}catch(error){}if(moved<8)sweep()};
+  veil.addEventListener('pointerup',up);veil.addEventListener('pointercancel',up);
+  // Quitter la pièce éteint la lampe.
+  enterHooks[0]=()=>{if(on)setUv(false)};
  }
 
  // ---------- 2. cadeaux : la carte d'abord, puis le cryptex ----------
  function buildGift(body){
   const bow='<svg class="bw" viewBox="0 0 74 74" aria-hidden="true"><defs><linearGradient id="gbw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb95e"/><stop offset="1" stop-color="#d9690f"/></linearGradient></defs><path d="M30 0L74 44V74L44 74 0 30V0z" fill="url(#gbw)" opacity=".95"/><g transform="translate(52 22) rotate(45)"><ellipse cx="-9" cy="-4" rx="9" ry="5.5" fill="#ffd9a0" stroke="#8c4308" stroke-width="1.4"/><ellipse cx="9" cy="-4" rx="9" ry="5.5" fill="#ffd9a0" stroke="#8c4308" stroke-width="1.4"/><circle r="4" fill="#ffb95e" stroke="#8c4308" stroke-width="1.4"/></g></svg>';
+  const alphabet=Array.from({length:26},(item,i)=>'<span><b>'+String.fromCharCode(65+i)+'</b>'+(i+1)+'</span>').join('');
   body.innerHTML='<div class="gi">'+bow+'<small>CARTE CADEAU</small><h3>Offrez une aventure</h3><p>La carte cadeau Elucid Escape · 2 à 6 joueurs</p><a class="d-ticket" href="'+GIFT+'" target="_blank" rel="noopener"><span>Offrir une carte cadeau ↗</span><small>Une aventure à partager</small></a></div>'
-   +'<p class="d-bonus">ÉNIGME BONUS · <i>1 CLÉ</i> CACHÉE</p>'
-   +'<div class="cx"><p class="cx-q">« Je suis au pied du sapin, j’aime les rubans et je fais toujours plaisir. » <b>(6 lettres)</b></p><div class="cx-r"></div><div class="cx-k"></div></div>';
-  const rings=$('.cx-r',body),box=$('.cx',body),slot=$('.cx-k',body),answer='CADEAU',letters=['M','Q','F','T','L','B'];
+   +'<div class="cx"><p class="d-bonus" style="margin:0 0 6px">ÉNIGME BONUS · <i>1 CLÉ</i> CACHÉE</p><div class="cx-tube"><i class="cx-cap l"></i><div class="cx-r"></div><i class="cx-cap r"></i></div>'
+   +'<p class="cx-q">Un message codé a été gravé sur le cryptex : <b>5 · 14 · 9 · 7 · 13 · 5</b></p><div class="cx-abc" aria-label="Alphabet numéroté">'+alphabet+'</div><div class="cx-k"></div></div>';
+  const rings=$('.cx-r',body),box=$('.cx',body),slot=$('.cx-k',body),tube=$('.cx-tube',body),answer='ENIGME';
+  const letters=['T','B','R','W','C','L'];
   const columns=letters.map((letter,i)=>{
    const column=document.createElement('button');column.type='button';column.className='cx-c';column.setAttribute('aria-label','Anneau '+(i+1)+', lettre '+letter);
-   column.innerHTML='<i aria-hidden="true">▲</i><b>'+letter+'</b><i aria-hidden="true">▼</i>';rings.append(column);return column;
+   column.innerHTML='<u></u><b></b><u></u>';rings.append(column);return column;
   });
+  const wrap=(n)=>String.fromCharCode(65+mod(n,26));
+  function paintRing(i){
+   const parts=columns[i].children,code=letters[i].charCodeAt(0)-65;
+   parts[0].textContent=wrap(code-1);parts[1].textContent=letters[i];parts[2].textContent=wrap(code+1);
+   columns[i].setAttribute('aria-label','Anneau '+(i+1)+', lettre '+letters[i]);
+  }
+  columns.forEach((c,i)=>paintRing(i));
   let solved=false;
   function shift(i,step){
    if(solved)return;
-   letters[i]=String.fromCharCode(65+mod(letters[i].charCodeAt(0)-65+step,26));
-   columns[i].querySelector('b').textContent=letters[i];columns[i].setAttribute('aria-label','Anneau '+(i+1)+', lettre '+letters[i]);
+   letters[i]=wrap(letters[i].charCodeAt(0)-65+step);paintRing(i);
+   const col=columns[i];col.classList.remove('tick');void col.offsetWidth;col.classList.add('tick');
    tone([300+i*40],60,.05);api.buzz(4);
    if(letters.join('')===answer){
-    solved=true;box.classList.add('ok');jingle();api.buzz([14,30,20]);
-    const key=makeKey(2);slot.append(key);
+    solved=true;box.classList.add('ok');tube.classList.add('open');jingle();api.buzz([14,30,20]);
+    setTimeout(()=>slot.append(makeKey(2)),calm()?0:500);
    }
   }
   columns.forEach((column,i)=>{
@@ -227,7 +326,7 @@
    column.addEventListener('pointerdown',event=>{start=event.clientY;did=false;try{column.setPointerCapture(event.pointerId)}catch(error){}});
    column.addEventListener('pointermove',event=>{
     if(start===null)return;const dy=event.clientY-start;
-    if(Math.abs(dy)>=22){shift(i,dy<0?1:-1);start=event.clientY;did=true}
+    if(Math.abs(dy)>=20){shift(i,dy<0?1:-1);start=event.clientY;did=true}
    });
    const end=event=>{if(start===null)return;start=null;try{column.releasePointerCapture(event.pointerId)}catch(error){}if(!did)shift(i,1)};
    column.addEventListener('pointerup',end);column.addEventListener('pointercancel',end);
@@ -281,7 +380,7 @@
   const tiles=[['lock','Un escape game ?'],['users','Qui peut jouer ?'],['clock','Une partie ?'],['gauge','Difficulté ?'],['bulb','Effrayé ?'],['mail','Autre question']];
   body.innerHTML='<div class="iq"><h4></h4><div class="iq-in"></div><div class="iq-a"></div></div><div class="iq-t">'+tiles.map((tile,i)=>'<button type="button" data-i="'+i+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+icon[tile[0]]+'</svg>'+tile[1]+'</button>').join('')+'</div>';
   const box=$('.iq',body),title=$('h4',body),inst=$('.iq-in',body),ans=$('.iq-a',body),buttons=$$('.iq-t button',body);
-  const lightKey=makeKey(4);
+  const lightKey=makeKey(4),flips=[];
   // 1. le cadenas : on glisse le loquet
   function lockInstrument(){
    inst.innerHTML='<div class="iq-lock"><svg viewBox="0 0 50 54" aria-hidden="true"><g class="sh"><path d="M13 24V16a12 12 0 0 1 24 0v8" fill="none" stroke="#c9d6e2" stroke-width="5" stroke-linecap="round"/></g><rect x="5" y="22" width="40" height="30" rx="7" fill="#e8832a" stroke="#8c4308" stroke-width="2"/><circle cx="25" cy="35" r="4" fill="#2a1704"/></svg><div class="sl" style="width:100%"><div class="sl-t"></div><div class="sl-k" style="left:15px"></div></div></div>';
@@ -327,6 +426,8 @@
     toggle.classList.toggle('off',off);toggle.setAttribute('aria-pressed',String(!off));box.classList.toggle('dark',off);
     label.textContent=off?'Éclairage : tamisé… et si on cherchait ?':'Éclairage : allumé';lightKey.style.visibility=off?'visible':'hidden';
     tone([off?220:330],90,.06);api.buzz(6);
+    const now=Date.now();flips.push(now);while(flips.length>0)if(now-flips[0]>5000){flips.shift()}else{break}
+    if(flips.length>=8){flips.length=0;egg('💥','Court-circuit !','Vous avez fait sauter le disjoncteur. Ne le dites pas au maître du jeu.','Il fait déjà assez noir comme ça.',[])}
    });
   }
   function mailInstrument(){
@@ -344,7 +445,7 @@
   show(1);
  }
 
- // ---------- 5. contact : un téléphone à touches ----------
+  // ---------- 5. contact : un téléphone à touches, avec ses secrets ----------
  function buildContact(body){
   const icon={
    pin:'<path d="M12 21s7-6.2 7-11a7 7 0 1 0-14 0c0 4.8 7 11 7 11z"/><circle cx="12" cy="10" r="2.5"/>',
@@ -357,17 +458,48 @@
   const svg=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+icon[name]+'</svg>';
   const social=socials.map(item=>{const key=/instagram/.test(item[1])?'ig':/facebook/.test(item[1])?'fb':'li';return'<a href="'+item[1]+'" target="_blank" rel="noopener" aria-label="'+item[0]+'">'+svg(key)+'</a>'}).join('');
   body.innerHTML='<div class="ci"><div class="ci-r">'+svg('pin')+'<span class="adr"></span></div><div class="ci-r">'+svg('phone')+'<b>'+TELTEXT+'</b></div><div class="ci-r">'+svg('mail')+'<a href="mailto:'+mail+'" style="color:#9defff"></a></div><div class="ci-s">'+social+'</div></div>'
-   +'<div class="kp"><div class="kp-l"><div class="kp-d" aria-live="polite"></div><div class="kp-g"></div></div><div class="kp-r"><div class="kp-note">Énigme bonus : mot de passe du maître du jeu <b style="white-space:nowrap">6 9 0 #</b></div><div class="kp-slot" aria-label="Retour de monnaie"></div><a class="kp-call" href="'+TEL+'">Appeler</a><button type="button" class="kp-clr">Effacer</button></div></div>';
+   +'<div class="kp"><div class="kp-l"><div class="kp-d" aria-live="polite"></div><div class="kp-g"></div></div><div class="kp-r"><div class="kp-note">Énigme bonus : le maître du jeu ne décroche que pour ceux qui savent <b>lire dans le noir</b>…</div><div class="kp-slot" aria-label="Retour de monnaie"></div><a class="kp-call" href="'+TEL+'">Appeler</a><button type="button" class="kp-clr">Effacer</button></div></div>';
   $('.adr',body).innerHTML=addressHtml.replace(/<br\s*\/?>/g,', ').replace(/^Elucid Escape,\s*/,'');
   $('.ci a[href^="mailto"]',body).textContent=mail;
   const display=$('.kp-d',body),grid=$('.kp-g',body),call=$('.kp-call',body),slot=$('.kp-slot',body);
   const rows=[697,770,852,941],cols=[1209,1336,1477],layout=['1','2','3','4','5','6','7','8','9','*','0','#'];
-  let typed='',unlocked=false;
+  let typed='',history='',unlocked=false;
   function paint(){
    if(typed){display.textContent=typed.slice(-9);display.style.opacity='1'}else{display.textContent=TELTEXT;display.style.opacity='.45'}
    const digits=typed.replace(/[^0-9]/g,'');
    call.href=TEL;
-   if(digits.length>=3)if(!/690/.test(typed))call.href='tel:'+digits;
+   if(digits.length>=3)call.href='tel:'+digits;
+  }
+  // Les petits secrets du standard.
+  const melody=[[262,200],[262,200],[262,200],[294,200],[330,400],[294,200],[262,200],[330,200],[294,200],[294,200],[262,400]];
+  function playMelody(){let at=0;melody.forEach(note=>{setTimeout(()=>tone([note[0]],note[1]*.9,.12),at);at+=note[1]+40})}
+  const instant=[
+   {test:/0326673801$/,icon:'📞',title:'Allô ?',text:'Bienvenue chez Elucid Escape, le meilleur escape game de Châlons-en-Champagne !',small:'(en même temps, on est les seuls)',call:true},
+   {test:/11123213221$/,icon:'🎵',title:'Bravo !',text:'Vous êtes un super musicien.',small:'« Au clair de la lune », version téléphone à touches.',melody:true}
+  ];
+  const delayed=[
+   {test:/^(112|15|17|18)$/,icon:'🚨',title:'Ce n’est pas le 112…',text:'Mais si votre équipe est bloquée sur une énigme, on a des indices en réserve.',small:'Pour une vraie urgence, raccrochez et composez le bon numéro.'},
+   {test:/^3615$/,icon:'📟',title:'3615 ELUCID',text:'Le Minitel n’est plus ce qu’il était… mais l’escape game, si !',small:'Veuillez patienter, connexion à 1200 bauds.'},
+   {test:/^666$/,icon:'😈',title:'Mauvais numéro',text:'Ici, on s’échappe de l’Apocalypse, pas de l’enfer.',small:'Le Comte Gustavo vous passe le bonjour.'},
+   {test:/^(0000|1234)$/,icon:'🔓',title:'Code trop facile',text:'Même nos énigmes sont mieux protégées que ça.',small:'Essayez encore, ou lisez dans le noir.'},
+   {test:/^42$/,icon:'🌌',title:'La réponse…',text:'… à la grande question sur la vie, l’univers et le reste. Pas à l’énigme du jour.',small:'Mais bien tenté.'},
+   {test:/^007$/,icon:'🕵️',title:'Agent 007 ?',text:'Désolé, ici on cherche un virus, pas un agent secret.',small:'Le virus s’appelle Kaluptein.'}
+  ];
+  function fire(secret){
+   if(secret.melody)playMelody();
+   egg(secret.icon,secret.title,secret.text,secret.small,secret.call?[{label:'Appeler pour de vrai',href:TEL}]:[]);
+  }
+  // Les secrets longs partent tout de suite ; les codes courts attendent une pause, sinon « 112 » éclaterait au milieu d'une mélodie.
+  let burst='',burstTimer=0,resetTimer=0;
+  function checkSecrets(){
+   for(let i=0;i<instant.length;i++){
+    if(instant[i].test.test(history)){history='';burst='';clearTimeout(burstTimer);fire(instant[i]);return}
+   }
+   clearTimeout(burstTimer);
+   burstTimer=setTimeout(()=>{
+    const sequence=burst;burst='';
+    for(let i=0;i<delayed.length;i++){if(delayed[i].test.test(sequence)){history='';fire(delayed[i]);return}}
+   },1100);
   }
   layout.forEach((key,i)=>{
    const button=document.createElement('button');button.type='button';button.textContent=key;button.setAttribute('aria-label','Touche '+key);
@@ -376,16 +508,20 @@
    button.addEventListener('pointerup',release);button.addEventListener('pointercancel',release);button.addEventListener('pointerleave',release);
    button.addEventListener('click',()=>{
     if(typed.length>=12)typed='';
-    typed+=key;paint();
-    if(/690#$/.test(typed))if(!unlocked){
-     unlocked=true;jingle();api.buzz([14,30,20]);
-     slot.innerHTML='';slot.append(makeKey(5));
-     setTimeout(()=>{typed='';paint()},900);
+    typed+=key;history=(history+key).slice(-16);burst+=key;paint();
+    clearTimeout(resetTimer);resetTimer=setTimeout(()=>{history=''},4000);
+    if(/690#$/.test(history)){
+     if(!unlocked){
+      unlocked=true;jingle();api.buzz([14,30,20]);slot.innerHTML='';slot.append(makeKey(5));
+      setTimeout(()=>{typed='';paint()},900);
+     }
+     history='';burst='';clearTimeout(burstTimer);return;
     }
+    checkSecrets();
    });
    grid.append(button);
   });
-  $('.kp-clr',body).addEventListener('click',()=>{typed='';paint();tone([260],80,.06)});
+  $('.kp-clr',body).addEventListener('click',()=>{typed='';history='';burst='';clearTimeout(burstTimer);paint();tone([260],80,.06)});
   paint();
  }
 
