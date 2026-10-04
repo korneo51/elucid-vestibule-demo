@@ -2,7 +2,7 @@
 
 Exploration locale, côté téléphone uniquement. Suite de la v13 (`MOBILE-V13.md`) après le retour : « le défilement est trop classique, j'aurais voulu qu'on avance de pièce en pièce, en gardant l'idée qu'il faut descendre, et des petits gestes façon "glisser pour déverrouiller" pour passer d'une pièce à l'autre ».
 
-Le parcours classique de la v13 reste intact et disponible. Les trois voyages remplacent seulement la partie « après le hall ». Le verrou d'entrée, les deux portes et leurs fiches, les clés cachées, les prix et la barre du bas sont communs.
+Le parcours classique de la v13 reste disponible. Les trois voyages remplacent seulement la partie « après le hall ». Le verrou d'entrée, le hall en 3D (voir `MOBILE-V14.md`) et ses fiches, les clés cachées, les prix et la barre du bas sont communs.
 
 ## Choisir le style
 
@@ -16,18 +16,20 @@ Sept salles : le hall, les tarifs, les cadeaux, les avis, les questions, l'équi
 
 **B · L'ascenseur.** Même geste, mais on descend d'étage en étage (RDC, −1 … −6). Les portes de la cabine se ferment quand on bouge, le compteur lumineux change, la cabine vibre légèrement, puis les portes s'ouvrent sur la salle. Il suffit de descendre.
 
-**C · Les mécanismes.** Pas de défilement : pour passer à la salle suivante, un petit geste différent à chaque fois, avec la même plongée dans la porte que A.
+**C · Les mécanismes.** Pas de défilement : pour passer à la salle suivante, on manipule un petit objet au doigt, un différent à chaque fois. Il ouvre sa propre « porte » et la vue plonge dedans. Plus aucun appui long (il déclenchait le menu contextuel du téléphone).
 
-| Passage | Geste |
-|---|---|
-| Hall → Tarifs | tirer un levier vers le bas |
-| Tarifs → Cadeaux | tourner une molette (un trois-quarts de tour) |
-| Cadeaux → Avis | poser le doigt sur un scanner d'empreinte |
-| Avis → Questions | glisser pour déverrouiller |
-| Questions → Équipe | tirer un loquet vers la gauche |
-| Équipe → Contact | maintenir un gros bouton |
+| Passage | Objet à manipuler | Ce qui s'ouvre |
+|---|---|---|
+| Hall → Tarifs | levier à faire pivoter en arc | la porte métallique du vestibule |
+| Tarifs → Cadeaux | clé à glisser dans le cadenas (elle tourne, l'anse saute) | une boîte cadeau en 3D, couvercle qui se soulève |
+| Cadeaux → Avis | roue de coffre à tourner d'un tour (huit voyants s'allument) | porte ronde de coffre-fort qui pivote |
+| Avis → Questions | chaîne à tirer vers le bas | rideau métallique qui se relève |
+| Questions → Équipe | prise à brancher, câble qui suit le doigt | sas bleu à deux vantaux |
+| Équipe → Contact | verrou à tirer vers la gauche | grand portail en bois à deux battants |
 
-Ce ne sont pas des énigmes. Chaque geste a une alternative : un simple toucher le fait tout seul, la touche Entrée aussi. La barre du haut et celle du bas permettent d'aller directement n'importe où. À tester : six gestes avant le contact, c'est amusant une fois et peut-être long pour un visiteur pressé.
+Le panneau de commande (métal brossé, vis, voyants rouge puis vert) est dessiné en SVG et CSS, sans image. Le geste pilote déjà la « porte » : elle apparaît et commence à s'ouvrir pendant qu'on tire, puis la plongée finit seule dans une lumière chaude (bleue pour le sas). Lâcher trop tôt ramène l'objet en arrière.
+
+Ce ne sont pas des énigmes. Chaque objet a une alternative : un simple toucher joue le geste tout seul, la touche Entrée aussi. La barre du haut et celle du bas permettent d'aller directement n'importe où. Le panneau est masqué quand on regarde une porte du hall.
 
 ## Animations réduites
 
@@ -47,15 +49,15 @@ Chromium sans GPU, processeur ralenti ×4, téléphone émulé 393 × 851, 2,75 
 |---|---|
 | A | 32 sur 424 |
 | B | 14 sur 407 |
-| C | 51 sur 482 (quatre passages automatiques) |
+| C | 0 sur 1 182 (les six passages, objets et portes) |
 | Rappel v13, déverrouillage | 1 sur 199 |
 
-Le tunnel animé (A et C) est le poste le plus lourd. Si le téléphone rame réellement, il se coupe tout seul pour la session.
+Le tunnel animé (A) est le poste le plus lourd. Si le téléphone rame réellement, il se coupe tout seul pour la session. Le style C n'en a plus : ses « portes » sont des éléments CSS qui ne bougent que par transformation et opacité.
 
 ## Vérifications
 
 - A et B : défilement par balayages tactiles réels, une salle à la fois (un coup sec ne saute jamais une salle, un demi-balayage revient en arrière).
-- C : les six gestes joués avec des événements tactiles réels, glissé trop court qui revient, simple toucher, retour par la barre du haut, saut par la barre du bas.
+- C : les six objets joués avec des événements tactiles réels (arc du levier, glissé de la clé, tour complet de la roue, chaîne, câble, verrou), glissé trop court qui revient, simple toucher, retour par la barre du haut, saut par la barre du bas, et les six « portes » photographiées à sept avancements.
 - Aucune erreur console, aucun débordement horizontal, parcours classique et version PC inchangés.
 
 ## À décider avec vous

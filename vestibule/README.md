@@ -2,9 +2,13 @@
 
 ## Exploration en cours : voyages A, B, C (téléphone)
 
-Trois façons d'avancer de pièce en pièce au lieu de défiler une page : traverser des portes (A), descendre en ascenseur (B), petits gestes de déverrouillage (C). Sélecteur de style dans la barre du bas, parcours classique conservé. Détails : `VOYAGES.md`.
+Trois façons d'avancer de pièce en pièce au lieu de défiler une page : traverser des portes (A), descendre en ascenseur (B), petits objets à manipuler au doigt qui ouvrent chacun leur porte (C). Sélecteur de style dans la barre du bas, parcours classique conservé. Détails : `VOYAGES.md`.
 
-## Version locale la plus récente : v13 « le verrou, les deux portes, les clés » (téléphone)
+## Hall en 3D (téléphone, v14)
+
+Le hall reprend la scène en perspective de la version PC : on balaie vers une porte pour tourner la vue vers elle, on balaie encore (ou on touche) pour y entrer. Sélecteur « Les Rouages · Hall · CybertraX » et languettes sur les bords pour comprendre qu'on peut aller de chaque côté. Détails et mesures : `MOBILE-V14.md`.
+
+## Version locale précédente : v13 « le verrou, les deux portes, les clés » (téléphone)
 
 Parcours téléphone entièrement refait : un verrou à glisser, deux grandes portes côte à côte, des fiches de salle avec bouton de réservation toujours visible, la suite en défilement naturel avec une barre de navigation en bas, 5 clés cachées facultatives, et un fondu clair quand le téléphone limite les animations. La version PC est inchangée. Principe, mesures, fichiers et checklist : `MOBILE-V13.md`. `MOBILE-V12.md` décrit la version précédente (poids, WebP, prix), dont ces parties restent valables.
 

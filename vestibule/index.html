@@ -12,15 +12,15 @@
 </section>
 <div class="m-page" role="main">
 <section class="m-hall" id="m-hall" data-dock="portes">
-<div class="m-hall-bg" aria-hidden="true"><img src="../assets/v12/hall.webp" alt="" width="1672" height="941" decoding="async"></div>
+<div class="m-view layered-hall cue-active" aria-label="Le hall des aventures"></div>
 <div class="m-hall-copy m-rise" style="--i:0"><p class="m-eyebrow">LE HALL DES AVENTURES</p><h2>Quelle porte <em>poussez-vous ?</em></h2></div>
-<div class="m-doors m-rise" style="--i:1">
-<button class="m-door rouages" type="button" data-door="rouages" aria-haspopup="dialog" aria-label="Ouvrir la porte des Rouages de l’apocalypse"><span class="m-sign" aria-hidden="true"><span>Les rouages<br>de l’apocalypse</span></span><span class="m-frame" aria-hidden="true"><span class="m-room"><img src="../assets/v12/room-rouages.webp" alt="" width="1024" height="1536" decoding="async"></span><span class="m-half l" style="--door:url('../assets/v12/door-rouages.webp')"></span><span class="m-half r" style="--door:url('../assets/v12/door-rouages.webp')"></span><span class="m-shine"></span></span><span class="m-door-label"><b>Les Rouages</b><small>Atelier mécanique · 2–6 joueurs</small><i>Entrer ›</i></span></button>
-<button class="m-door cybertrax" type="button" data-door="cybertrax" aria-haspopup="dialog" aria-label="Ouvrir la porte de CybertraX"><span class="m-sign" aria-hidden="true"><span>Cyber<span>traX</span></span></span><span class="m-frame" aria-hidden="true"><span class="m-room"><img src="../assets/v12/room-cybertrax.webp" alt="" width="1024" height="1536" decoding="async"></span><span class="m-half l" style="--door:url('../assets/v12/door-cybertrax.webp')"></span><span class="m-half r" style="--door:url('../assets/v12/door-cybertrax.webp')"></span><span class="m-shine"></span></span><span class="m-door-label"><b>CybertraX</b><small>Laboratoire futuriste · bientôt</small><i>Découvrir ›</i></span></button>
-</div>
-<p class="m-hint m-rise" style="--i:2">Touchez une porte pour l’ouvrir</p>
-<a class="m-more m-rise" style="--i:3" href="#m-tarifs"><span>Tarifs, avis et infos pratiques</span><i aria-hidden="true">↓</i></a>
-<button class="m-key" type="button" data-key="1" aria-label="Une clé cachée : touchez-la" style="left:20px;bottom:150px"><svg aria-hidden="true"><use href="#m-key"/></svg></button>
+<div class="m-pager m-rise" style="--i:1" role="group" aria-label="Choisir une porte"><button type="button" data-look="-1">‹ Les Rouages</button><button type="button" data-look="0" aria-pressed="true">Hall</button><button type="button" data-look="1">CybertraX ›</button></div>
+<p class="m-swipe m-rise" style="--i:3" aria-hidden="true"><i></i><span>Glissez vers une porte</span></p>
+<button class="m-turn l m-rise" style="--i:2" type="button" data-look="-1" aria-label="Aller vers la porte des Rouages de l’apocalypse"><i aria-hidden="true">‹</i><span>Les<br>Rouages</span></button>
+<button class="m-turn r m-rise" style="--i:2" type="button" data-look="1" aria-label="Aller vers la porte de CybertraX"><i aria-hidden="true">›</i><span>Cyber<br>traX</span></button>
+<div class="m-enter" hidden><p class="m-enter-name"></p><p class="m-enter-sub"></p><div class="m-enter-row"><button type="button" class="m-enter-back" data-look="0">‹ Hall</button><button type="button" class="m-enter-go">Entrer ›</button></div></div>
+<a class="m-more m-rise" style="--i:4" href="#m-tarifs"><span>Tarifs, avis et infos pratiques</span><i aria-hidden="true">↓</i></a>
+<button class="m-key" type="button" data-key="1" aria-label="Une clé cachée : touchez-la" style="right:12px;top:62%"><svg aria-hidden="true"><use href="#m-key"/></svg></button>
 </section>
 <section class="m-sec" id="m-tarifs" data-dock="tarifs" data-take=".ee-pricing"><p class="m-sec-tag"><b><i>01</i></b>Composez votre équipe</p><button class="m-key" type="button" data-key="2" aria-label="Une clé cachée : touchez-la" style="right:26px;top:150px"><svg aria-hidden="true"><use href="#m-key"/></svg></button></section>
 <section class="m-sec" id="m-gift" data-dock="tarifs" data-take=".ee-gift"><p class="m-sec-tag"><b><i>02</i></b>À offrir</p></section>

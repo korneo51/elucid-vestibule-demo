@@ -121,11 +121,12 @@
  function finishGate(){
   gate.hidden=true;root.classList.remove('m-locked');setPhase('page');window.scrollTo(0,0);
   door.style.transition='none';door.style.transform='';unlocking=false;
+  setTimeout(peek,1500);
   if(!recall('ee-key-hint')){remember('ee-key-hint','1');setTimeout(()=>say('Psst… 5 clés sont cachées dans le vestibule. Les trouverez-vous ?',{ms:6000}),900)}
  }
  function showGate(){
   hideToast();gate.hidden=false;gate.classList.remove('is-open','is-fading');door.style.transition='none';door.style.transform='';
-  gateP=0;paintGate(0);thumb.style.animation='none';void thumb.offsetWidth;thumb.style.animation='';unlocking=false;
+  gateP=0;paintGate(0);thumb.style.animation='none';void thumb.offsetWidth;thumb.style.animation='';unlocking=false;if(board)if(look!==0)setLook(0,true);
   root.classList.add('m-locked');setPhase('gate');window.scrollTo(0,0);
  }
  function skipGate(){
@@ -136,13 +137,133 @@
  const skipLink=document.querySelector('.skip-link');
  if(skipLink)skipLink.addEventListener('click',event=>{event.preventDefault();if(gate.hidden){go('m-tarifs')}else{skipGate()}});
 
- // ---------- 2. the hall: push a door ----------
- const doors={rouages:$('.m-door.rouages'),cybertrax:$('.m-door.cybertrax')},sheets={rouages:$('[data-sheet="rouages"]'),cybertrax:$('[data-sheet="cybertrax"]')};
+ // ---------- 2. the hall: turn to a door, walk through it ----------
+ // The PC hall is an illustration with the two doors projected onto its walls. It is cloned here at the height of the phone and
+ // panned sideways: a swipe turns the view toward the door on that side, a second swipe (or a tap) pushes the door open and walks in.
+ const sheets={rouages:$('[data-sheet="rouages"]'),cybertrax:$('[data-sheet="cybertrax"]')};
+ const view=$('.m-view'),source=document.querySelector('.layered-hall .hall-artboard'),enter=$('.m-enter');
+ const ART_W=1672,ART_H=941,lookOf={rouages:-1,cybertrax:1},nameAt={'-1':'rouages','1':'cybertrax'};
+ const doorInfo={rouages:['Les Rouages de l’apocalypse','Atelier mécanique · 2–6 joueurs'],cybertrax:['CybertraX','Laboratoire futuriste · bientôt']};
+ const restY=variant==='c'?-30:0;
+ let board=null,centerDoor=null,portals=[],buttons={},look=0,camX=0,camY=0,zoom=1,nudge=0,camId=0,spots={rouages:{x:0,y:0},cybertrax:{x:0,y:0}},reach={left:0,center:0,right:0},scaleOf=1,heightOf=1,peekId=0,previewTimer=0,lastSwipe=0;
  let openName='',doorBusy=false;
- function openDoor(name){
-  if(doorBusy)return;doorBusy=true;buzz(14);hideToast();
-  root.classList.add('m-choosing');doors[name].classList.add('is-open');
-  setTimeout(()=>showSheet(name),calm?140:660);
+ if(source){
+  board=source.cloneNode(true);board.removeAttribute('style');board.classList.add('m-board');
+  const clip=board.querySelector('clipPath');if(clip)clip.id='m-apertures';
+  board.querySelector('.hall-background').style.clipPath='url(#m-apertures)';
+  view.append(board);
+  portals=[...board.querySelectorAll('[data-project]')];
+  centerDoor=document.createElement('button');centerDoor.type='button';centerDoor.className='m-center';centerDoor.setAttribute('aria-label','Continuer vers les tarifs et les infos pratiques');
+  centerDoor.innerHTML='<span class="m-center-door"><span class="m-gate-light"></span><i class="m-leaf l"></i><i class="m-leaf r"></i><svg class="m-lock" viewBox="0 0 140 140" fill="none" aria-hidden="true"><circle cx="70" cy="70" r="64"/><circle class="m-ticks" cx="70" cy="70" r="55"/><path d="M70 30 110 70 70 110 30 70Z"/><path d="M63 70h14M70 63v14"/></svg></span><span class="m-center-tag">TARIFS &amp; INFOS ↓</span>';
+  board.append(centerDoor);centerDoor.addEventListener('click',()=>go('m-tarifs'));
+  buttons={rouages:board.querySelector('.room-link[data-room="rouages"]'),cybertrax:board.querySelector('.room-link[data-room="cybertrax"]')};
+ }
+ // Maps the flat source rectangle of each layer onto its quadrilateral on the wall (same method as the PC page).
+ function project(element,s){
+  const target=JSON.parse(element.dataset.corners).map(point=>[point[0]*s,point[1]*s]),sw=Number(element.dataset.sourceWidth)||360,sh=Number(element.dataset.sourceHeight)||540;
+  const corners=[[0,0],[sw,0],[sw,sh],[0,sh]],m=[];
+  corners.forEach((point,i)=>{const u=target[i][0],v=target[i][1],x=point[0],y=point[1];m.push([x,y,1,0,0,0,-u*x,-u*y,u],[0,0,0,x,y,1,-v*x,-v*y,v])});
+  for(let c=0;c<8;c++){
+   let pivot=c;for(let r=c+1;r<8;r++)if(Math.abs(m[r][c])>Math.abs(m[pivot][c]))pivot=r;
+   const swap=m[c];m[c]=m[pivot];m[pivot]=swap;const d=m[c][c];for(let k=c;k<9;k++)m[c][k]/=d;
+   for(let r=0;r<8;r++)if(r!==c){const f=m[r][c];for(let k=c;k<9;k++)m[r][k]-=f*m[c][k]}
+  }
+  const q=m.map(row=>row[8]);
+  element.style.transform='matrix3d('+[q[0],q[3],0,q[6],q[1],q[4],0,q[7],0,0,1,0,q[2],q[5],0,1].join(',')+')';
+  return target;
+ }
+ function layout(){
+  if(!board)return;
+  const W=innerWidth,H=innerHeight,s=Math.max(W/ART_W,H/ART_H),w=ART_W*s,h=ART_H*s;
+  scaleOf=s;heightOf=h;
+  Object.assign(board.style,{left:'0px',top:(-H*.06).toFixed(1)+'px',width:w.toFixed(1)+'px',height:h.toFixed(1)+'px',transformOrigin:'50% 50%'});
+  board.style.setProperty('--art-scale',String(s));
+  portals.forEach(element=>{
+   const quad=project(element,s);
+   if(element.dataset.project==='left')spots.rouages={x:(quad[0][0]+quad[1][0]+quad[2][0]+quad[3][0])/4,y:(quad[0][1]+quad[1][1]+quad[2][1]+quad[3][1])/4};
+   if(element.dataset.project==='right')spots.cybertrax={x:(quad[0][0]+quad[1][0]+quad[2][0]+quad[3][0])/4,y:(quad[0][1]+quad[1][1]+quad[2][1]+quad[3][1])/4};
+  });
+  reach={left:0,center:(W-w)/2,right:W-w};
+  Object.assign(centerDoor.style,{left:(741*s).toFixed(1)+'px',top:(482*s).toFixed(1)+'px',width:(190*s).toFixed(1)+'px',height:(258*s).toFixed(1)+'px'});
+  if(!doorBusy)camX=cameraAt(look);
+  if(!doorBusy)camY=look===0?restY:-34;
+  paint();
+ }
+ function cameraAt(value){return value<0?reach.left:value>0?reach.right:reach.center}
+ function paint(){board.style.transform='translate3d('+(camX+nudge).toFixed(1)+'px,'+camY.toFixed(1)+'px,0) scale('+zoom.toFixed(4)+')'}
+ function camTween(to,duration,ease,done){
+  const id=++camId,from={x:camX,y:camY,z:zoom},aim={x:to.x===undefined?from.x:to.x,y:to.y===undefined?from.y:to.y,z:to.z===undefined?from.z:to.z},start=performance.now();
+  if(!duration||calm){camX=aim.x;camY=aim.y;zoom=aim.z;paint();if(done)done();return}
+  function tick(now){if(id!==camId)return;const t=Math.min(1,(now-start)/duration),k=ease(t);camX=from.x+(aim.x-from.x)*k;camY=from.y+(aim.y-from.y)*k;zoom=from.z+(aim.z-from.z)*k;paint();if(t<1){requestAnimationFrame(tick)}else if(done){done()}}
+  requestAnimationFrame(tick);
+ }
+ function setPreview(name){Object.keys(buttons).forEach(key=>{if(buttons[key])buttons[key].classList.toggle('is-preview',key===name)})}
+ function setLook(next,instant){
+  if(!board)return;
+  stopPeek();clearTimeout(previewTimer);
+  const changed=next!==look;look=next;
+  root.dataset.hallLook=String(look);hall.dataset.look=String(look);hall.classList.toggle('is-facing',look!==0);
+  $$('.m-pager button').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.look)===look)));
+  const name=nameAt[String(look)];
+  if(look!==0){root.dataset.hallLooked='1';enter.querySelector('.m-enter-name').textContent=doorInfo[name][0];enter.querySelector('.m-enter-sub').textContent=doorInfo[name][1];enter.hidden=false}else{enter.hidden=true}
+  if(changed)buzz(8);
+  if(look===0){setPreview('')}
+  camTween({x:cameraAt(look),y:look===0?restY:-34,z:1},instant?0:680,easeInOut,()=>{
+   if(look!==0){previewTimer=setTimeout(()=>{if(look===lookOf[name])if(!openName)setPreview(name)},calm?0:260)}
+  });
+ }
+ // Swipe toward a door to turn to it; swipe again the same way to go in; swipe the other way to come back.
+ function swiped(direction){
+  if(doorBusy)return;if(openName)return;
+  if(look===0){setLook(direction);return}
+  if(direction===look){enterDoor(nameAt[String(look)]);return}
+  setLook(0);
+ }
+ let pointer=null;
+ hall.addEventListener('pointerdown',event=>{
+  if(!board)return;if(doorBusy)return;if(openName)return;if(root.dataset.mPhase==='gate')return;
+  if(event.pointerType==='mouse')if(event.button!==0)return;
+  stopPeek();pointer={id:event.pointerId,x:event.clientX,y:event.clientY,active:false,t:performance.now()};
+ });
+ hall.addEventListener('pointermove',event=>{
+  if(!pointer)return;if(event.pointerId!==pointer.id)return;
+  const dx=event.clientX-pointer.x,dy=event.clientY-pointer.y;
+  if(!pointer.active){
+   if(Math.abs(dy)>14)if(Math.abs(dy)>Math.abs(dx)){pointer=null;return}
+   if(Math.abs(dx)<12)return;if(Math.abs(dx)<Math.abs(dy)*1.3)return;
+   pointer.active=true;try{hall.setPointerCapture(event.pointerId)}catch(error){}
+  }
+  // The view leans toward the door it is about to turn to.
+  nudge=clamp(-dx*.32,-56,56);paint();
+ });
+ function endPointer(event){
+  if(!pointer)return;if(event.pointerId!==pointer.id)return;
+  const finished=pointer;pointer=null;
+  if(!finished.active)return;
+  lastSwipe=performance.now();
+  const dx=event.clientX-finished.x,quick=Math.abs(dx)/Math.max(1,performance.now()-finished.t)>.35;
+  nudge=0;paint();
+  if(event.type==='pointerup')if(Math.abs(dx)>=36||quick)swiped(dx<0?-1:1);
+ }
+ hall.addEventListener('pointerup',endPointer);hall.addEventListener('pointercancel',endPointer);
+ hall.addEventListener('click',event=>{if(performance.now()-lastSwipe<300){event.preventDefault();event.stopPropagation()}},true);
+ // Buttons: arrows on the edges, the three-way selector, and the doors and arrow cues drawn in the hall.
+ $$('[data-look]').forEach(button=>button.addEventListener('click',()=>setLook(Number(button.dataset.look))));
+ function faceOrEnter(name){if(look===lookOf[name]){enterDoor(name)}else{setLook(lookOf[name])}}
+ if(board){
+  board.querySelectorAll('[data-room]').forEach(element=>element.addEventListener('click',event=>{event.preventDefault();faceOrEnter(element.dataset.room)}));
+  enter.querySelector('.m-enter-go').addEventListener('click',()=>{if(look!==0)enterDoor(nameAt[String(look)])});
+ }
+ function enterDoor(name){
+  if(doorBusy)return;doorBusy=true;buzz(14);hideToast();stopPeek();clearTimeout(previewTimer);
+  root.classList.add('m-choosing');setPreview(name);
+  if(calm){setTimeout(()=>showSheet(name),160);return}
+  const spot=spots[name],door=buttons[name].getBoundingClientRect();
+  board.style.transformOrigin=spot.x.toFixed(1)+'px '+spot.y.toFixed(1)+'px';
+  // The doorway fills the screen: its height on screen decides how far to move in.
+  const target=clamp(innerHeight/Math.max(80,door.height)*1.05,1.8,3.4);
+  camTween({z:target},980,easeInOut);
+  setTimeout(()=>showSheet(name),700);
  }
  function showSheet(name){
   const sheet=sheets[name];openName=name;sheet.hidden=false;root.classList.add('m-sheet-open','m-locked');
@@ -151,17 +272,37 @@
   setTimeout(()=>{sheet.querySelector('.m-sheet-close').focus({preventScroll:true})},500);
   doorBusy=false;
  }
+ function leaveDoor(){camTween({z:1},calm?0:620,easeOut,()=>{board.style.transformOrigin='50% 50%';paint()});root.classList.remove('m-choosing')}
  function closeSheet(afterId){
   if(!openName)return;const name=openName,sheet=sheets[name];openName='';
   sheet.style.transition='';sheet.style.transform='';sheet.classList.remove('is-open');root.classList.remove('m-sheet-open');
-  doors[name].classList.remove('is-open');root.classList.remove('m-choosing');
-  setTimeout(()=>{sheet.hidden=true;root.classList.remove('m-locked');if(afterId){go(afterId)}else{doors[name].focus({preventScroll:true})}},calm?380:640);
+  leaveDoor();
+  setTimeout(()=>{sheet.hidden=true;root.classList.remove('m-locked');if(afterId){go(afterId)}else if(buttons[name]){buttons[name].focus({preventScroll:true})}},calm?380:640);
  }
  function switchSheet(name){
-  const current=openName,sheet=sheets[current];sheet.classList.remove('is-open');doors[current].classList.remove('is-open');openName='';
-  setTimeout(()=>{sheet.hidden=true;doors[name].classList.add('is-open');showSheet(name)},calm?220:460);
+  const current=openName,sheet=sheets[current];sheet.classList.remove('is-open');openName='';
+  setTimeout(()=>{
+   sheet.hidden=true;look=lookOf[name];root.dataset.hallLook=String(look);hall.dataset.look=String(look);
+   $$('.m-pager button').forEach(button=>button.setAttribute('aria-pressed',String(Number(button.dataset.look)===look)));
+   enter.querySelector('.m-enter-name').textContent=doorInfo[name][0];enter.querySelector('.m-enter-sub').textContent=doorInfo[name][1];
+   const spot=spots[name],door=buttons[name].getBoundingClientRect();
+   board.style.transformOrigin=spot.x.toFixed(1)+'px '+spot.y.toFixed(1)+'px';
+   camX=cameraAt(look);camY=-34;zoom=1;paint();setPreview(name);
+   showSheet(name);
+  },calm?220:460);
  }
- $$('.m-door').forEach(button=>button.addEventListener('click',()=>openDoor(button.dataset.door)));
+ // First visit: the view drifts a little to each side so the visitor sees that it can turn.
+ function stopPeek(){peekId+=1;if(nudge!==0){nudge=0;if(board)paint()}}
+ function peek(){
+  if(!board)return;if(calm)return;if(recall('ee-peek'))return;remember('ee-peek','1');
+  const id=++peekId,start=performance.now();
+  function tick(now){
+   if(id!==peekId)return;
+   const t=Math.min(1,(now-start)/2400);nudge=Math.sin(t*Math.PI*2)*38*(1-t*.35);paint();
+   if(t<1){requestAnimationFrame(tick)}else{nudge=0;paint()}
+  }
+  requestAnimationFrame(tick);
+ }
  $$('.m-sheet').forEach(sheet=>{
   sheet.querySelector('.m-sheet-close').addEventListener('click',()=>closeSheet());
   sheet.addEventListener('click',event=>{
@@ -177,6 +318,8 @@
   const release=event=>{if(!pull)return;if(event.pointerId!==pull.id)return;const distance=pull.dy;pull=null;sheet.style.transition='';if(distance>110){closeSheet()}else{sheet.style.transform=''}};
   hero.addEventListener('pointerup',release);hero.addEventListener('pointercancel',release);
  });
+ root.dataset.hallLook='0';hall.dataset.look='0';
+ layout();addEventListener('resize',layout,{passive:true});
 
  // ---------- 3. keys, dock, reveal ----------
  let found=[];try{found=JSON.parse(recall('ee-keys')||'[]')}catch(error){found=[]}
@@ -260,7 +403,7 @@
   if(tiltBase===null)tiltBase={g:event.gamma,b:event.beta};
   tiltX=clamp((event.gamma-tiltBase.g)/22,-1,1);tiltY=clamp((event.beta-tiltBase.b)/22,-1,1);
   if(tiltQueued)return;tiltQueued=true;
-  requestAnimationFrame(()=>{tiltQueued=false;hall.style.setProperty('--tx',tiltX.toFixed(3));hall.style.setProperty('--ty',tiltY.toFixed(3))});
+  requestAnimationFrame(()=>{tiltQueued=false;hall.style.setProperty('--tx',tiltX.toFixed(3));hall.style.setProperty('--ty',tiltY.toFixed(3));if(board)board.style.translate=(-tiltX*9).toFixed(1)+'px '+(-tiltY*5).toFixed(1)+'px'});
  }
  function startTilt(){
   if(tiltOn)return;if(calm)return;if(!('DeviceOrientationEvent' in window))return;if(!isSecureContext)return;

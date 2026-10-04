@@ -94,7 +94,7 @@
  function refreshNav(){
   const k=Math.round(p);
   if(k===current)return;
-  current=k;
+  current=k;root.dataset.room=String(k);
   dockLinks.forEach(link=>link.setAttribute('aria-current',String(link.dataset.dock===rooms[k].dataset.dock)));
   // The last room has nothing further: the bottom bar already leads back to the start.
   next.hidden=variant==='c'||k>=N-1;
@@ -106,11 +106,14 @@
  // ---------- A and C: through the doors ----------
  let tunnel=null,tunnelContext=null,door=null,bar=null,doorScale=6;
  const doorMarkup='<div class="a-door m-gate-door"><div class="m-gate-light"></div><div class="m-leaf l"></div><div class="m-leaf r"></div><svg class="m-lock" viewBox="0 0 140 140" fill="none" aria-hidden="true"><circle cx="70" cy="70" r="64"/><circle class="m-ticks" cx="70" cy="70" r="55"/><path d="M70 30 110 70 70 110 30 70Z"/><path d="M63 70h14M70 63v14"/></svg></div>';
+ function initBar(){
+  bar=document.createElement('div');bar.className='a-bar';bar.innerHTML=names.map((name,index)=>'<button type="button" class="a-seg" data-room="'+index+'" aria-label="Aller à : '+name+'"><i><b></b></i></button>').join('');hud.append(bar);
+  bar.addEventListener('click',event=>{const seg=event.target.closest('.a-seg');if(seg)goStop(Number(seg.dataset.room))});
+ }
  function initDoors(){
   tunnel=document.createElement('canvas');tunnel.className='a-tunnel';bg.append(tunnel);tunnelContext=tunnel.getContext('2d');
   fx.innerHTML=doorMarkup;door=fx.querySelector('.a-door');
-  bar=document.createElement('div');bar.className='a-bar';bar.innerHTML=names.map((name,index)=>'<button type="button" class="a-seg" data-room="'+index+'" aria-label="Aller à : '+name+'"><i><b></b></i></button>').join('');hud.append(bar);
-  bar.addEventListener('click',event=>{const seg=event.target.closest('.a-seg');if(seg)goStop(Number(seg.dataset.room))});
+  initBar();
   sizeDoors();if(lite)tunnel.style.display='none';drawTunnel(0);
  }
  function sizeDoors(){
@@ -181,26 +184,121 @@
   if(Math.abs(d)<.012){if(k!==lastFloor){lastFloor=k;api.buzz(14)}}else if(close>.5){lastFloor=-1}
  }
 
- // ---------- C: tiny unlock gestures ----------
- const passages=['lever','dial','scan','slide','latch','hold'];
- const captions={lever:'Tirez le levier',dial:'Tournez la molette',scan:'Posez le doigt pour scanner',slide:'Glissez pour déverrouiller',latch:'Tirez le loquet',hold:'Maintenez le bouton'};
- let host=null,widgetBusy=false;
- function initMechanisms(){
-  initDoors();
-  host=document.createElement('div');host.className='c-host';hud.append(host);
-  showPassage(0);
+ // ---------- C: mechanisms ----------
+ // Six small tactile objects, one between each pair of rooms: a lever to swing, a key to slide, a wheel to turn, a chain to pull,
+ // a plug to connect, a bolt to draw. Using one opens its own gateway (door, box, vault, shutter, airlock, gate) and the view dives through.
+ const kinds=['lever','key','wheel','chain','plug','bolt'];
+ const captions={lever:'Actionnez le levier',key:'Glissez la clé dans la serrure',wheel:'Tournez la roue',chain:'Tirez la chaîne',plug:'Branchez la prise',bolt:'Tirez le verrou'};
+ const hints={lever:'→',key:'→',wheel:'↻',chain:'↓',plug:'→',bolt:'←'};
+ const gateOf={lever:'door',key:'box',wheel:'vault',chain:'shutter',plug:'blast',bolt:'wood'};
+ let host=null,widgetBusy=false,glow=null,gate=null,gateName='';
+ const bowSvg='<svg viewBox="0 0 84 56" aria-hidden="true"><path d="M42 30C26 4 4 8 6 24c2 16 26 10 36 6Z" fill="#f4c964" stroke="#a8741c" stroke-width="2"/><path d="M42 30C58 4 80 8 78 24c-2 16-26 10-36 6Z" fill="#f4c964" stroke="#a8741c" stroke-width="2"/><path d="M42 30 22 52M42 30l20 22" stroke="#d9a441" stroke-width="7" stroke-linecap="round"/><circle cx="42" cy="30" r="8" fill="#e6b24c" stroke="#a8741c" stroke-width="2"/></svg>';
+ const gateBuilders={
+  door(){
+   const el=document.createElement('div');el.className='m-gate-door g g-door';
+   el.innerHTML='<div class="m-gate-light"></div><div class="m-leaf l"></div><div class="m-leaf r"></div><svg class="m-lock" viewBox="0 0 140 140" fill="none" aria-hidden="true"><circle cx="70" cy="70" r="64"/><circle class="m-ticks" cx="70" cy="70" r="55"/><path d="M70 30 110 70 70 110 30 70Z"/><path d="M63 70h14M70 63v14"/></svg>';
+   const left=el.querySelector('.l'),right=el.querySelector('.r'),lock=el.querySelector('.m-lock'),light=el.querySelector('.m-gate-light');
+   return{el,dive:()=>Math.max(innerWidth/el.offsetWidth,innerHeight/el.offsetHeight)*1.3,update(open){
+    left.style.transform='translate3d('+(-open*100).toFixed(1)+'%,0,0)';right.style.transform='translate3d('+(open*100).toFixed(1)+'%,0,0)';
+    lock.style.transform='rotate('+(open*210).toFixed(1)+'deg)';lock.style.opacity=(1-smooth((open-.5)/.5)).toFixed(3);light.style.opacity=(.3+.7*open).toFixed(3);
+   }};
+  },
+  box(){
+   const el=document.createElement('div');el.className='g g-box';
+   el.innerHTML='<i class="gb-beam"></i><div class="gb-scene"><i class="gb-f gb-floor"></i><i class="gb-f gb-back"></i><i class="gb-f gb-left"></i><i class="gb-f gb-right"></i><i class="gb-f gb-front"><u></u></i>'
+    +'<div class="gb-lid"><i class="gb-f gb-top"><u></u>'+bowSvg+'</i><i class="gb-f gb-lip"></i><i class="gb-f gb-lip r"></i><i class="gb-f gb-lip l"></i></div></div>';
+   const lid=el.querySelector('.gb-lid'),beam=el.querySelector('.gb-beam');
+   el.style.transformOrigin='50% 46%';
+   return{el,dive:()=>Math.max(innerWidth,innerHeight)/95*1.15,update(open){
+    lid.style.transform='translateZ(-65px) rotateX('+(open*114).toFixed(1)+'deg)';beam.style.opacity=smooth((open-.15)/.5).toFixed(3);
+   }};
+  },
+  vault(){
+   const el=document.createElement('div');el.className='g g-vault';
+   const bolts=Array.from({length:16},(item,i)=>'<circle cx="125" cy="13" r="5.5" transform="rotate('+(i*22.5)+' 125 125)"/>').join('');
+   const lugs=Array.from({length:12},(item,i)=>'<rect x="94" y="3" width="8" height="15" rx="2" transform="rotate('+(i*30+15)+' 98 98)"/>').join('');
+   el.innerHTML='<svg class="gv-frame" viewBox="0 0 250 250" aria-hidden="true"><circle cx="125" cy="125" r="123" fill="#3b4652"/><circle cx="125" cy="125" r="118" fill="#7d8996"/><circle cx="125" cy="125" r="104" fill="#27303a"/><circle cx="125" cy="125" r="100" fill="#050810"/><g fill="#d4dbe2" stroke="#1b222b" stroke-width="1.5">'+bolts+'</g></svg><i class="gv-hole"></i>'
+    +'<div class="gv-door"><svg viewBox="0 0 196 196" aria-hidden="true"><circle cx="98" cy="98" r="97" fill="#8f9ba7"/><circle cx="98" cy="98" r="90" fill="#5b6672"/><circle cx="98" cy="98" r="78" fill="#7f8b97"/><circle cx="98" cy="98" r="76" fill="none" stroke="#2c353f" stroke-width="2"/><circle cx="98" cy="98" r="56" fill="none" stroke="#2c353f" stroke-width="2"/><circle cx="98" cy="98" r="54" fill="#6a7683"/><g fill="#39434e">'+lugs+'</g><circle cx="98" cy="98" r="30" fill="#2a343e" stroke="#e8832a" stroke-width="3"/></svg>'
+    +'<svg class="gv-wheel" viewBox="0 0 196 196" aria-hidden="true"><g stroke="#aeb9c4" stroke-linecap="round" fill="#aeb9c4"><path d="M98 52V144M52 98H144" stroke-width="9"/><circle cx="98" cy="50" r="8"/><circle cx="98" cy="146" r="8"/><circle cx="50" cy="98" r="8"/><circle cx="146" cy="98" r="8"/></g><circle cx="98" cy="98" r="13" fill="#e8832a"/></svg></div>';
+   const door=el.querySelector('.gv-door'),wheel=el.querySelector('.gv-wheel'),hole=el.querySelector('.gv-hole');
+   return{el,dive:()=>Math.max(innerWidth,innerHeight)/160*1.25,update(open){
+    const turn=smooth(open/.45),swing=smooth((open-.4)/.6);
+    wheel.style.transform='rotate('+(-turn*200).toFixed(1)+'deg)';door.style.transform='perspective(900px) rotateY('+(-swing*108).toFixed(1)+'deg)';hole.style.opacity=(.35+.65*swing).toFixed(3);
+   }};
+  },
+  shutter(){
+   const el=document.createElement('div');el.className='g g-shut';
+   el.innerHTML='<div class="gs-view"><i class="gs-light"></i><div class="gs-slats"><i class="gs-bar"></i></div></div><i class="gs-roll"></i>';
+   const slats=el.querySelector('.gs-slats'),light=el.querySelector('.gs-light');
+   return{el,dive:()=>Math.max(innerWidth/210,innerHeight/250)*1.25,update(open){
+    slats.style.transform='translate3d(0,'+(-open*101).toFixed(1)+'%,0)';light.style.opacity=(.4+.6*open).toFixed(3);
+   }};
+  },
+  blast(){
+   const el=document.createElement('div');el.className='g g-blast';
+   el.innerHTML='<div class="gx-view"><i class="gx-light"></i><div class="gx-leaf l"><i></i></div><div class="gx-leaf r"><i></i></div></div><i class="gx-led a"></i><i class="gx-led b"></i><i class="gx-led c"></i>';
+   const left=el.querySelector('.gx-leaf.l'),right=el.querySelector('.gx-leaf.r'),light=el.querySelector('.gx-light'),leds=[...el.querySelectorAll('.gx-led')];
+   return{el,dive:()=>Math.max(innerWidth/220,innerHeight/270)*1.3,update(open){
+    left.style.transform='translate3d('+(-open*100).toFixed(1)+'%,0,0)';right.style.transform='translate3d('+(open*100).toFixed(1)+'%,0,0)';light.style.opacity=(.35+.65*open).toFixed(3);
+    leds.forEach((led,i)=>{led.style.opacity=(open>i*.28?1:.25).toFixed(2)});
+   }};
+  },
+  wood(){
+   const el=document.createElement('div');el.className='g g-wood';
+   el.innerHTML='<div class="gw-view"><i class="gw-light"></i><div class="gw-leaf l"><i></i></div><div class="gw-leaf r"><i></i></div></div>';
+   const left=el.querySelector('.gw-leaf.l'),right=el.querySelector('.gw-leaf.r'),light=el.querySelector('.gw-light');
+   return{el,dive:()=>Math.max(innerWidth/200,innerHeight/250)*1.3,update(open){
+    left.style.transform='rotateY('+(open*84).toFixed(1)+'deg)';right.style.transform='rotateY('+(-open*84).toFixed(1)+'deg)';light.style.opacity=(.4+.6*open).toFixed(3);
+   }};
+  }
+ };
+ function ensureGate(index){
+  const name=gateOf[kinds[Math.min(index,kinds.length-1)]];
+  if(name===gateName)return;
+  if(gate)gate.el.remove();
+  gate=gateBuilders[name]();gateName=name;gate.el.style.opacity='0';
+  fx.insertBefore(gate.el,glow);glow.classList.toggle('cy',name==='blast');gate.scale=gate.dive();
  }
- function setM(value){p=stop+value*.5;ride(p)}
+ function rideGateway(value){
+  const index=Math.floor(value),t=value-index,to=Math.min(N-1,index+1);
+  bar.querySelectorAll('b').forEach((fill,i)=>{fill.style.transform='scaleX('+clamp(value-i,0,1).toFixed(3)+')'});
+  if(t<.002){
+   showRooms([index]);place(index,1,'');
+   if(gate)gate.el.style.opacity='0';
+   glow.style.opacity='0';return;
+  }
+  ensureGate(index);showRooms([index,to]);
+  const fadeOut=1-smooth(t/.2),fadeIn=smooth((t-.76)/.24);
+  place(index,fadeOut,'translate3d(0,'+(-t*30).toFixed(1)+'px,0) scale('+(.95+.05*fadeOut).toFixed(3)+')');
+  place(to,fadeIn,'scale('+(.93+.07*fadeIn).toFixed(3)+')');
+  const appear=smooth(t/.18),open=smooth((t-.22)/.36),dolly=smooth((t-.56)/.3),fade=1-smooth((t-.9)/.1);
+  gate.el.style.opacity=(appear*fade).toFixed(3);
+  gate.el.style.transform='scale('+((.6+.4*appear)*(1+dolly*(gate.scale-1))).toFixed(3)+')';
+  gate.update(open);
+  glow.style.opacity=(smooth((t-.6)/.22)*(1-smooth((t-.86)/.14))).toFixed(3);
+ }
+ function initMechanisms(){
+  initBar();
+  glow=document.createElement('div');glow.className='g-glow';fx.append(glow);
+  host=document.createElement('div');host.className='c-host';hud.append(host);
+  fitHost();showPassage(0);
+ }
+ // The control panel is drawn at 340 x 148 and scaled down on narrow or short screens.
+ function fitHost(){
+  const k=Math.min(1,(innerWidth-24)/340,innerHeight<700?.84:1);
+  host.style.setProperty('--ck',k.toFixed(3));host.style.height=Math.round(148*k+30)+'px';
+ }
+ function setM(value){p=stop+value*.4;ride(p)}
  function rewind(value,visual){api.tween(value,0,380,easeOut,v=>{visual(v);setM(v)})}
- function complete(value,visual){
+ function complete(value,visual,duration){
   api.buzz([16,40,28]);
-  api.tween(value,1,180,easeOut,v=>{visual(v);setM(v)},()=>{
+  api.tween(value,1,duration||180,easeOut,v=>{visual(v);setM(v)},()=>{
    widgetBusy=true;host.classList.add('busy');
-   const from=p;
-   api.tween(from,stop+1,api.isCalm()?420:980,easeInOut,v=>{p=v;ride(v)},()=>{stop+=1;p=stop;ride(p);widgetBusy=false;showPassage(stop);api.buzz(12)});
+   api.tween(p,stop+1,api.isCalm()?420:1150,easeInOut,v=>{p=v;ride(v)},()=>{stop+=1;p=stop;ride(p);widgetBusy=false;showPassage(stop);api.buzz(12)});
   });
  }
- function release(value,visual,moved){if(!moved||value>=.84){complete(value,visual)}else{rewind(value,visual)}}
+ // A tap with no movement plays the gesture by itself, so the passage never depends on dexterity.
+ function release(value,visual,moved){if(!moved){complete(value,visual,560)}else if(value>=.84){complete(value,visual)}else{rewind(value,visual)}}
  function drag(target,handlers){
   let active=null;
   target.addEventListener('pointerdown',event=>{if(active!==null)return;if(widgetBusy)return;active=event.pointerId;try{target.setPointerCapture(active)}catch(error){}api.tween(0,0,1,t=>t,()=>{});handlers.down(event)});
@@ -208,74 +306,117 @@
   const end=event=>{if(event.pointerId!==active)return;active=null;handlers.up(event)};
   target.addEventListener('pointerup',end);target.addEventListener('pointercancel',end);
  }
- const thumbSvg='<svg viewBox="0 0 28 28" width="28" height="28" fill="none" stroke="#f0a35c" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3 25 14 14 25 3 14Z"/><path d="M11 14h6M14.5 11l3 3-3 3"/></svg>';
- function barWidget(kind){
-  const mirror=kind==='latch',el=document.createElement('div');el.className='m-slide c-bar'+(mirror?' c-latch':'');
-  el.innerHTML='<span class="m-slide-fill"></span><span class="m-slide-label">'+captions[kind]+'</span><button class="m-thumb" type="button" aria-label="'+captions[kind]+'">'+(mirror?'<i class="c-grip"></i>':thumbSvg)+'</button>';
-  const thumb=el.querySelector('.m-thumb'),fill=el.querySelector('.m-slide-fill'),label=el.querySelector('.m-slide-label');
-  let value=0,x0=0,v0=0,moved=false;
-  const max=()=>Math.max(1,el.clientWidth-thumb.offsetWidth-12);
-  function visual(v){value=v;const x=v*max();thumb.style.transform='translate3d('+(mirror?-x:x).toFixed(1)+'px,0,0)';fill.style.transform='scaleX('+clamp((x+58)/el.clientWidth,0,1).toFixed(3)+')';label.style.opacity=String(clamp(1-v*1.9,0,1))}
-  drag(thumb,{down(event){x0=event.clientX;v0=value;moved=false;thumb.style.animation='none'},
-   move(event){const dx=(mirror?-1:1)*(event.clientX-x0);if(Math.abs(dx)>5)moved=true;visual(clamp(v0+dx/max(),0,1));setM(value)},
-   up(){release(value,visual,moved)}});
-  thumb.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();complete(value,visual)}});
-  return el;
- }
+ function unit(el){return el.offsetWidth?el.getBoundingClientRect().width/el.offsetWidth:1}
+ function panel(kind){const el=document.createElement('div');el.className='c-panel p-'+kind;return el}
+ function keys(target,value,visual){target.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();complete(value(),visual,560)}})}
+
  function leverWidget(){
-  const el=document.createElement('div');el.className='c-lever';
-  el.innerHTML='<div class="c-slot"><i class="c-rod"></i><button class="c-knob" type="button" aria-label="'+captions.lever+'"></button></div><span class="c-cap">'+captions.lever+' <b aria-hidden="true">↓</b></span>';
-  const slot=el.querySelector('.c-slot'),knob=el.querySelector('.c-knob'),rod=el.querySelector('.c-rod');
-  let value=0,y0=0,v0=0,moved=false;
-  const max=()=>Math.max(1,slot.clientHeight-knob.offsetHeight-8);
-  function visual(v){value=v;knob.style.transform='translate3d(0,'+(v*max()).toFixed(1)+'px,0)';rod.style.transform='scaleY('+v.toFixed(3)+')'}
-  drag(knob,{down(event){y0=event.clientY;v0=value;moved=false},move(event){const dy=event.clientY-y0;if(Math.abs(dy)>5)moved=true;visual(clamp(v0+dy/max(),0,1));setM(value)},up(){release(value,visual,moved)}});
-  knob.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();complete(value,visual)}});
+  const el=panel('lever');
+  el.innerHTML='<svg class="c-art" viewBox="0 0 340 148" aria-hidden="true"><path d="M93 87A87 87 0 0 1 247 87" fill="none" stroke="#04070b" stroke-width="26" stroke-linecap="round"/><path d="M93 87A87 87 0 0 1 247 87" fill="none" stroke="#1b2838" stroke-width="18" stroke-linecap="round"/><path d="M93 87A87 87 0 0 1 247 87" fill="none" stroke="#e8832a" stroke-width="2" stroke-dasharray="1 9" stroke-linecap="round" opacity=".75"/><circle cx="170" cy="128" r="23" fill="#2a3340" stroke="#0a0f15" stroke-width="3"/><circle cx="170" cy="128" r="17" fill="#c9a05a"/><circle cx="170" cy="128" r="17" fill="none" stroke="#fff4d6" stroke-opacity=".5" stroke-width="2" stroke-dasharray="26 80"/></svg>'
+   +'<i class="c-lamp r"></i><i class="c-lamp g"></i><div class="c-lv"><div class="c-arm"><i class="c-stalk"></i><button class="c-ball" type="button" aria-label="'+captions.lever+'"></button></div><i class="c-hub"></i></div>';
+  const arm=el.querySelector('.c-arm'),ball=el.querySelector('.c-ball'),pivot=el.querySelector('.c-lv'),MIN=-62,MAX=62;
+  let value=0,off=0,moved=false,mark=0;
+  const pointer=event=>{const box=pivot.getBoundingClientRect();return Math.atan2(event.clientX-box.left,box.top-event.clientY)*180/Math.PI};
+  function visual(v){value=v;el.style.setProperty('--v',v.toFixed(3));arm.style.transform='rotate('+(MIN+v*(MAX-MIN)).toFixed(1)+'deg)'}
+  drag(ball,{down(event){off=pointer(event)-(MIN+value*(MAX-MIN));moved=false;ball.classList.add('on')},
+   move(event){const angle=clamp(pointer(event)-off,MIN,MAX);if(Math.abs(angle-(MIN+value*(MAX-MIN)))>.4)moved=true;const m=Math.floor(angle/12);if(m!==mark){mark=m;api.buzz(5)}visual((angle-MIN)/(MAX-MIN));setM(value)},
+   up(){ball.classList.remove('on');release(value,visual,moved)}});
+  keys(ball,()=>value,visual);visual(0);
   return el;
  }
- function dialWidget(){
-  const el=document.createElement('div');el.className='c-dial';
-  el.innerHTML='<svg class="c-arc" viewBox="0 0 100 100" aria-hidden="true"><circle class="c-arc-bg" cx="50" cy="50" r="46"/><circle class="c-arc-on" cx="50" cy="50" r="46" pathLength="1"/></svg><button class="c-wheel" type="button" aria-label="'+captions.dial+'"><i></i></button><span class="c-cap">'+captions.dial+' <b aria-hidden="true">↻</b></span>';
-  const wheel=el.querySelector('.c-wheel'),arc=el.querySelector('.c-arc-on'),MAX=Math.PI*1.5;
+ function keyWidget(){
+  const el=panel('key'),RANGE=112,FINGER=140;
+  el.innerHTML='<svg class="c-lock" viewBox="0 0 120 112" aria-hidden="true"><defs><linearGradient id="ck-b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f0d08a"/><stop offset=".55" stop-color="#c9953a"/><stop offset="1" stop-color="#7c5320"/></linearGradient></defs>'
+   +'<g class="c-shackle"><path d="M34 52V32a26 26 0 0 1 52 0V52" fill="none" stroke="#0d1218" stroke-width="15" stroke-linecap="round"/><path d="M34 52V32a26 26 0 0 1 52 0V52" fill="none" stroke="#c2cbd4" stroke-width="10" stroke-linecap="round"/><path d="M38 50V33a22 22 0 0 1 22-22" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2.5" stroke-linecap="round"/></g>'
+   +'<rect x="8" y="50" width="104" height="58" rx="11" fill="url(#ck-b)" stroke="#4d3510" stroke-width="2"/><rect x="14" y="56" width="92" height="46" rx="8" fill="none" stroke="#fff4d0" stroke-opacity=".35" stroke-width="2"/><rect x="8" y="68" width="30" height="16" rx="5" fill="#0a0d12"/><rect x="11" y="72" width="26" height="8" rx="3" fill="#2a1f10"/><circle cx="82" cy="79" r="9" fill="#a9772a" stroke="#4d3510" stroke-width="2"/></svg>'
+   +'<button class="c-keyb" type="button" aria-label="'+captions.key+'"><svg viewBox="0 0 128 44" aria-hidden="true"><defs><linearGradient id="ck-g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0bd"/><stop offset=".5" stop-color="#e0aa4a"/><stop offset="1" stop-color="#8a5a1c"/></linearGradient></defs><circle cx="22" cy="22" r="17" fill="none" stroke="url(#ck-g)" stroke-width="8"/><rect x="36" y="18" width="88" height="9" rx="3" fill="url(#ck-g)"/><path d="M96 27h8v10h-8zM110 27h8v7h-8z" fill="#c4902f"/><circle cx="22" cy="22" r="6" fill="#05080d" opacity=".55"/></svg></button>'
+   +'<i class="c-lamp r"></i><i class="c-lamp g"></i>';
+  const key=el.querySelector('.c-keyb'),keySvg=key.firstChild,shackle=el.querySelector('.c-shackle');
+  let value=0,x0=0,v0=0,moved=false,scale=1;
+  function visual(v){
+   value=v;el.style.setProperty('--v',v.toFixed(3));
+   const twist=smooth((v-.8)/.2);
+   key.style.transform='translate3d('+(Math.min(1,v/.8)*RANGE).toFixed(1)+'px,0,0)';keySvg.style.transform='scaleY('+(1-2*twist).toFixed(3)+')';
+   shackle.style.transform='translate('+(-2*twist).toFixed(1)+'px,'+(-13*twist).toFixed(1)+'px) rotate('+(-28*twist).toFixed(1)+'deg)';
+  }
+  drag(key,{down(event){x0=event.clientX;v0=value;moved=false;scale=unit(el)},
+   move(event){const dx=(event.clientX-x0)/scale;if(Math.abs(dx)>4)moved=true;visual(clamp(v0+dx/FINGER,0,1));setM(value)},
+   up(){release(value,visual,moved)}});
+  keys(key,()=>value,visual);visual(0);
+  return el;
+ }
+ function wheelWidget(){
+  const el=panel('wheel'),MAX=Math.PI*2;
+  const leds=Array.from({length:8},(item,i)=>'<i class="c-led" style="--a:'+(-157.5+i*45)+'deg"></i>').join('');
+  el.innerHTML='<i class="c-bezel"></i>'+leds+'<button class="c-wheel" type="button" aria-label="'+captions.wheel+'"><svg viewBox="-8 -8 156 156" aria-hidden="true"><g fill="none" stroke-linecap="round"><circle cx="70" cy="70" r="49" stroke="#0b1016" stroke-width="14"/><circle cx="70" cy="70" r="49" stroke="#a5b1bd" stroke-width="10"/><circle cx="70" cy="70" r="53" stroke="#f1f5f8" stroke-opacity=".55" stroke-width="1.5"/><path d="M70 22V118M22 70H118" stroke="#0b1016" stroke-width="13"/><path d="M70 22V118M22 70H118" stroke="#a5b1bd" stroke-width="9"/></g><g fill="#c7d1db" stroke="#0b1016" stroke-width="2"><circle cx="70" cy="10" r="9"/><circle cx="70" cy="130" r="9"/><circle cx="10" cy="70" r="9"/><circle cx="130" cy="70" r="9"/></g><circle cx="70" cy="70" r="17" fill="#1f2832" stroke="#e8832a" stroke-width="3"/><circle cx="70" cy="70" r="6" fill="#e8832a"/><path d="M70 10l0 1" stroke="#e8832a" stroke-width="5" stroke-linecap="round"/></svg></button>';
+  const wheel=el.querySelector('.c-wheel'),lights=[...el.querySelectorAll('.c-led')];
   let value=0,last=0,acc=0,moved=false,mark=0;
   function angleOf(event){const box=wheel.getBoundingClientRect();return Math.atan2(event.clientY-(box.top+box.height/2),event.clientX-(box.left+box.width/2))}
-  function visual(v){value=v;acc=v*MAX;wheel.style.transform='rotate('+(acc*180/Math.PI).toFixed(1)+'deg)';arc.style.strokeDashoffset=String((1-v*.75).toFixed(3))}
-  drag(wheel,{down(event){last=angleOf(event);moved=false;mark=Math.floor(acc/(Math.PI/6))},
-   move(event){let a=angleOf(event),delta=a-last;if(delta>Math.PI)delta-=Math.PI*2;if(delta<-Math.PI)delta+=Math.PI*2;last=a;if(Math.abs(delta)>.01)moved=true;acc=clamp(acc+delta,0,MAX);const m=Math.floor(acc/(Math.PI/6));if(m!==mark){mark=m;api.buzz(6)}visual(acc/MAX);setM(value)},
+  function visual(v){value=v;acc=v*MAX;wheel.style.transform='rotate('+(acc*180/Math.PI).toFixed(1)+'deg)';const count=Math.floor(v*8.001);lights.forEach((led,i)=>led.classList.toggle('on',i<count));el.style.setProperty('--v',v.toFixed(3))}
+  drag(wheel,{down(event){last=angleOf(event);moved=false;mark=Math.floor(acc/(Math.PI/4))},
+   move(event){let a=angleOf(event),delta=a-last;if(delta>Math.PI)delta-=Math.PI*2;if(delta<-Math.PI)delta+=Math.PI*2;last=a;if(Math.abs(delta)>.01)moved=true;acc=clamp(acc+delta,0,MAX);const m=Math.floor(acc/(Math.PI/4));if(m!==mark){mark=m;api.buzz(6)}visual(acc/MAX);setM(value)},
    up(){release(value,visual,moved)}});
-  wheel.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();complete(value,visual)}});
-  visual(0);
+  keys(wheel,()=>value,visual);visual(0);
   return el;
  }
- function holdWidget(kind){
-  const el=document.createElement('div');el.className='c-hold c-'+kind;
-  const print='<svg class="c-print" viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" aria-hidden="true"><path d="M22 58a28 28 0 0 1 56 0M30 62a20 20 0 0 1 40 0v6M38 64a12 12 0 0 1 24 0v12M46 66a4 4 0 0 1 8 0v18"/></svg>';
-  el.innerHTML='<button class="c-pad" type="button" aria-label="'+captions[kind]+'">'+(kind==='scan'?print+'<i class="c-sweep"></i>':'<b>MAINTENIR</b>')+'<svg class="c-ring" viewBox="0 0 100 100" aria-hidden="true"><circle class="c-ring-bg" cx="50" cy="50" r="47"/><circle class="c-ring-on" cx="50" cy="50" r="47" pathLength="1"/></svg></button><span class="c-cap">'+captions[kind]+'</span>';
-  const pad=el.querySelector('.c-pad'),ringOn=el.querySelector('.c-ring-on'),sweep=el.querySelector('.c-sweep');
-  let value=0,holding=false,running=false,last=0,mark=0,done=false;
-  function visual(v){value=v;ringOn.style.strokeDashoffset=String((1-v).toFixed(3));if(sweep)sweep.style.transform='translate3d(0,'+(v*100).toFixed(1)+'%,0)';pad.classList.toggle('on',v>0.02)}
-  function loop(now){
-   if(!running)return;
-   const dt=Math.min(64,now-last);last=now;
-   value=clamp(value+(holding?dt/1150:-dt/380),0,1);visual(value);setM(value);
-   const m=Math.floor(value*4);if(m!==mark){mark=m;if(holding)api.buzz(7)}
-   if(value>=1)if(!done){done=true;running=false;holding=false;complete(1,visual);return}
-   if(value<=0)if(!holding){running=false;return}
-   requestAnimationFrame(loop);
+ function chainWidget(){
+  const el=panel('chain'),RANGE=50;
+  const bars=side=>'<span class="c-gauge '+side+'">'+Array.from({length:5},()=>'<i></i>').join('')+'</span>';
+  el.innerHTML='<i class="c-bracket"></i>'+bars('l')+bars('r')+'<div class="c-cord"><i class="c-chain"></i><button class="c-pull" type="button" aria-label="'+captions.chain+'"><i></i></button></div>';
+  const cord=el.querySelector('.c-cord'),pull=el.querySelector('.c-pull'),cells=[...el.querySelectorAll('.c-gauge i')];
+  let value=0,y0=0,v0=0,moved=false,scale=1,mark=0;
+  function visual(v){value=v;cord.style.transform='translate3d(0,'+(v*RANGE).toFixed(1)+'px,0)';const count=Math.floor(v*5.001);cells.forEach((cell,i)=>cell.classList.toggle('on',i%5<count));el.style.setProperty('--v',v.toFixed(3))}
+  drag(pull,{down(event){y0=event.clientY;v0=value;moved=false;scale=unit(el)},
+   move(event){const dy=(event.clientY-y0)/scale;if(Math.abs(dy)>4)moved=true;const next=clamp(v0+dy/RANGE,0,1),m=Math.floor(next*8);if(m!==mark){mark=m;api.buzz(5)}visual(next);setM(value)},
+   up(){release(value,visual,moved)}});
+  keys(pull,()=>value,visual);visual(0);
+  return el;
+ }
+ function plugWidget(){
+  const el=panel('plug'),T0={x:122,y:100},S={x:266,y:72},D0=Math.hypot(S.x-T0.x,S.y-T0.y);
+  el.innerHTML='<svg class="c-art" viewBox="0 0 340 148" aria-hidden="true"><path class="c-wire-a" fill="none" stroke="#04070b" stroke-width="11" stroke-linecap="round"/><path class="c-wire-b" fill="none" stroke="#2b6f88" stroke-width="3.5" stroke-linecap="round"/></svg>'
+   +'<div class="c-socket"><i class="c-hole a"></i><i class="c-hole b"></i><i class="c-lamp r"></i><i class="c-lamp g"></i></div><div class="c-pa"><div class="c-plug"><i class="c-prong"></i><i class="c-prong b"></i><button class="c-pbody" type="button" aria-label="'+captions.plug+'"><i></i><i></i><i></i></button></div></div><i class="c-spark"></i>';
+  const pa=el.querySelector('.c-pa'),wireA=el.querySelector('.c-wire-a'),wireB=el.querySelector('.c-wire-b'),body=el.querySelector('.c-pbody'),spark=el.querySelector('.c-spark');
+  let value=0,pos={x:T0.x,y:T0.y},grab={x:0,y:0},moved=false,scale=1,sparked=false;
+  function put(x,y){
+   pos={x:x,y:y};
+   const aim=clamp(Math.atan2(S.y-y,S.x-x)*180/Math.PI,-35,35),bx=x-72,slack=18*(1-Math.min(1,Math.max(0,(x-80)/190)));
+   pa.style.transform='translate3d('+x.toFixed(1)+'px,'+y.toFixed(1)+'px,0) rotate('+aim.toFixed(1)+'deg)';
+   const d='M-8 124C'+(bx*.5).toFixed(1)+' '+(128+slack).toFixed(1)+','+(bx-50).toFixed(1)+' '+(y+slack*.4).toFixed(1)+','+bx.toFixed(1)+' '+y.toFixed(1);
+   wireA.setAttribute('d',d);wireB.setAttribute('d',d);
   }
-  function begin(){if(widgetBusy)return;if(done)return;holding=true;if(!running){running=true;last=performance.now();requestAnimationFrame(loop)}}
-  pad.addEventListener('pointerdown',event=>{try{pad.setPointerCapture(event.pointerId)}catch(error){}begin()});
-  const end=()=>{holding=false};
-  pad.addEventListener('pointerup',end);pad.addEventListener('pointercancel',end);pad.addEventListener('lostpointercapture',end);
-  pad.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();if(!done){done=true;complete(value,visual)}}});
+  function visual(v){value=v;el.style.setProperty('--v',v.toFixed(3));put(T0.x+(S.x-T0.x)*v,T0.y+(S.y-T0.y)*v);if(v>.995)if(!sparked){sparked=true;spark.classList.remove('go');void spark.offsetWidth;spark.classList.add('go')}if(v<.9)sparked=false}
+  const local=event=>{const box=el.getBoundingClientRect();return{x:(event.clientX-box.left)/scale,y:(event.clientY-box.top)/scale}};
+  drag(body,{down(event){scale=unit(el);const at=local(event);grab={x:at.x-pos.x,y:at.y-pos.y};moved=false},
+   move(event){const at=local(event),x=clamp(at.x-grab.x,90,S.x),y=clamp(at.y-grab.y,36,128);if(Math.hypot(x-pos.x,y-pos.y)>1.5)moved=true;
+    const next=clamp(1-Math.hypot(S.x-x,S.y-y)/D0,0,1);value=next;el.style.setProperty('--v',next.toFixed(3));put(x,y);setM(next)},
+   up(){release(value,visual,moved)}});
+  keys(body,()=>value,visual);visual(0);
+  return el;
+ }
+ function boltWidget(){
+  const el=panel('bolt'),RANGE=120;
+  el.innerHTML='<svg class="c-art" viewBox="0 0 340 148" aria-hidden="true"><rect x="20" y="58" width="300" height="32" rx="16" fill="#05080d"/><rect x="24" y="62" width="292" height="24" rx="12" fill="#10181f"/></svg>'
+   +'<i class="c-lamp r"></i><i class="c-lamp g"></i><div class="c-bolt"><i class="c-shaft"></i><button class="c-grip2" type="button" aria-label="'+captions.bolt+'"><i></i></button></div><i class="c-keeper"></i>';
+  const bolt=el.querySelector('.c-bolt');
+  let value=0,x0=0,v0=0,moved=false,scale=1,mark=0;
+  function visual(v){value=v;el.style.setProperty('--v',v.toFixed(3));bolt.style.transform='translate3d('+(-v*RANGE).toFixed(1)+'px,0,0)'}
+  const grip=el.querySelector('.c-grip2');
+  drag(grip,{down(event){x0=event.clientX;v0=value;moved=false;scale=unit(el)},
+   move(event){const dx=(x0-event.clientX)/scale;if(Math.abs(dx)>4)moved=true;const next=clamp(v0+dx/RANGE,0,1),m=Math.floor(next*8);if(m!==mark){mark=m;api.buzz(5)}visual(next);setM(value)},
+   up(){release(value,visual,moved)}});
+  keys(grip,()=>value,visual);visual(0);
   return el;
  }
  function showPassage(index){
   host.classList.remove('busy');host.innerHTML='';
   if(index>=N-1)return;
-  const kind=passages[index];
-  const widget=kind==='lever'?leverWidget():kind==='dial'?dialWidget():kind==='scan'||kind==='hold'?holdWidget(kind):barWidget(kind);
-  host.append(widget);
+  const kind=kinds[index];
+  const widget=kind==='lever'?leverWidget():kind==='key'?keyWidget():kind==='wheel'?wheelWidget():kind==='chain'?chainWidget():kind==='plug'?plugWidget():boltWidget();
+  const wrap=document.createElement('div');wrap.className='c-wrap';
+  wrap.append(widget);
+  const caption=document.createElement('span');caption.className='c-cap';caption.innerHTML=captions[kind]+' <b aria-hidden="true">'+hints[kind]+'</b>';wrap.append(caption);
+  host.append(wrap);
  }
  function jumpTo(target){
   if(target===stop)if(Math.abs(p-stop)<.001)return;
@@ -289,6 +430,8 @@
   const index=Math.floor(value),t=value-index,to=Math.min(N-1,index+1);
   if(bar){bar.querySelectorAll('b').forEach((fill,i)=>{fill.style.transform='scaleX('+clamp(value-i,0,1).toFixed(3)+')'})}
   if(door)door.style.opacity='0';
+  if(gate)gate.el.style.opacity='0';
+  if(glow)glow.style.opacity='0';
   if(leaves){leaves[0].style.transform='translate3d(-101%,0,0)';leaves[1].style.transform='translate3d(101%,0,0)'}
   stage.style.transform='';
   if(t<.002){showRooms([index]);place(index,1,'');return}
@@ -299,7 +442,7 @@
  // ---------- driver ----------
  function ride(value){
   refreshNav();
-  if(api.isCalm()){rideCalm(value)}else if(variant==='b'){rideElevator(value)}else{rideDoors(value)}
+  if(api.isCalm()){rideCalm(value)}else if(variant==='b'){rideElevator(value)}else if(variant==='c'){rideGateway(value)}else{rideDoors(value)}
  }
  function measure(){const probe=j.querySelector('.j-snap');snapHeight=probe?probe.getBoundingClientRect().height:innerHeight;sizeDoors()}
  function goStop(index,instant){
@@ -314,7 +457,7 @@
   addEventListener('scroll',()=>{p=clamp(scrollY/snapHeight,0,N-1);ride(p)},{passive:true});
   addEventListener('resize',()=>{measure();ride(p)},{passive:true});
  }else{
-  addEventListener('resize',()=>{sizeDoors();ride(p)},{passive:true});
+  addEventListener('resize',()=>{fitHost();if(gate)gate.scale=gate.dive();ride(p)},{passive:true});
  }
  ride(0);
  root.classList.add('j-ready');

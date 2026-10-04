@@ -2,6 +2,8 @@
 
 Maquette de test uniquement, locale. Remplace entièrement le parcours téléphone des versions 6 à 12 ; la version PC (défilement au scroll) est inchangée.
 
+> **Le hall (point 2 ci-dessous) a été refait en v14** : les deux portes côte à côte laissent la place au hall en perspective de la version PC, avec balayage gauche/droite (`MOBILE-V14.md`). Le verrou, les fiches, les clés et la suite en défilement restent ceux décrits ici.
+
 ## Pourquoi tout refaire
 
 Premier essai de la v12 sur un vrai téléphone :
