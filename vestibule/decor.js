@@ -7,7 +7,8 @@
  'use strict';
  const api=window.eeMobile;
  if(!api)return;
- if(api.variant!=='d')return;
+ const MODE=api.variant;if(MODE!=='d')if(MODE!=='e')return;
+ const SCROLL=MODE==='e';
  const app=api.app,root=api.root,hall=api.hall,centerDoor=api.centerDoor;
  const BOOK='https://elucidescape.fr/booking/',GIFT='https://elucidescape.fr/cartecadeau/',TEL='tel:+33326673801',TELTEXT='03 26 67 38 01';
  const $=(selector,scope)=>(scope||app).querySelector(selector);
@@ -17,7 +18,7 @@
  const easeOut=api.easeOut,easeInOut=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
  const calm=()=>api.isCalm();
  const text=node=>node?node.textContent.replace(/\s+/g,' ').trim():'';
- root.classList.add('d-on');root.dataset.jv='d';
+ root.classList.add(SCROLL?'e-on':'d-on');root.dataset.jv=MODE;
 
  // ---------- données lues dans le contenu existant (une seule source) ----------
  const prices={};
@@ -57,7 +58,7 @@
  const N=defs.length,idToIndex={'m-tarifs':0,'m-gift':1,'m-avis':2,'m-faq':3,'m-equipe':4,'m-contact':4};
 
  // ---------- pièces : cadre commun ----------
- const layer=document.createElement('div');layer.className='d-rooms';layer.setAttribute('aria-hidden','true');app.append(layer);
+ const layer=document.createElement('div');layer.className='d-rooms';layer.setAttribute('aria-hidden','true');if(!SCROLL)app.append(layer);
  // ---------- un décor par pièce (dessiné, dans l'attente de vraies illustrations) ----------
  function seeded(seed){let s=seed;return()=>{s=(s*9301+49297)%233280;return s/233280}}
  const sceneOpen='<svg viewBox="0 0 393 780" preserveAspectRatio="xMidYMid slice" width="100%" height="100%" aria-hidden="true"><defs><filter id="sb" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="5"/></filter></defs>';
@@ -125,7 +126,7 @@
   }
  ];
  const roomEls=[];let current=-1;const enterHooks={};
- defs.forEach((def,index)=>{
+ if(!SCROLL)defs.forEach((def,index)=>{
   const prev=index===0?{name:'Hall',id:'m-hall'}:defs[index-1],last=index===N-1;
   const el=document.createElement('section');el.className='d-room';el.setAttribute('aria-label',def.name);el.inert=true;
   el.innerHTML='<div class="d-scene" aria-hidden="true">'+scenes[index]()+'</div><div class="d-top"><button class="d-hall" type="button" data-room="m-hall" aria-label="Retour au hall">⌂ Hall</button><div class="d-title" tabindex="-1"><small>0'+(index+1)+' / 0'+N+'</small><b>'+def.plate+'</b></div></div><div class="d-body"></div>'
@@ -149,7 +150,7 @@
   roomEls.forEach(el=>{el.classList.remove('is-here','is-before');el.inert=true});
   api.buzz(8);
  }
- api.setGoHook((id,instant)=>route(id));
+ if(!SCROLL)api.setGoHook((id,instant)=>route(id));
  document.addEventListener('keydown',event=>{
   if(event.key!=='Escape')return;
   const modal=$('.d-modal:not([hidden]),.d-egg:not([hidden])');if(modal){modal.hidden=true;return}
@@ -229,7 +230,7 @@
   // ---------- petites fenêtres des secrets (easter eggs) ----------
  const eggEl=document.createElement('div');eggEl.className='d-egg';eggEl.hidden=true;eggEl.setAttribute('role','dialog');eggEl.setAttribute('aria-modal','true');
  eggEl.innerHTML='<div class="d-egg-card"><i class="d-egg-ic" aria-hidden="true"></i><h4></h4><p></p><small></small><div class="d-egg-btns"></div></div>';
- layer.append(eggEl);
+ (SCROLL?document.body:layer).append(eggEl);
  function egg(icon,title,text,small,actions){
   eggEl.querySelector('.d-egg-ic').textContent=icon;eggEl.querySelector('h4').textContent=title;eggEl.querySelector('p').textContent=text;eggEl.querySelector('small').textContent=small||'';
   const buttons=eggEl.querySelector('.d-egg-btns');buttons.innerHTML='';
@@ -250,7 +251,7 @@
    +'<a class="d-ticket" href="'+BOOK+'" target="_blank" rel="noopener"><span>Choisir mon créneau ↗</span><small>Le nombre de joueurs se choisit à la réservation</small></a>'
    +'<button type="button" class="uv-btn" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l8-8M13 11l-3-3 5-5 3 3zM4 20l2-2"/><path d="M17 12l3 1M18 8l3-1M12 18l1 3" opacity=".7"/></svg><span>Allumer la lampe UV</span><i>1 CLÉ CACHÉE</i></button>'
    +'<p class="d-note">* À 2 : un minimum d’expérience · À 6 : la cohésion devient difficile · Plus de 6 : <a href="#" data-room="m-contact">contactez-nous</a></p>';
-  const room=body.closest('.d-room'),button=$('.uv-btn',body),label=$('span',button);
+  const room=body.closest('.d-room,.e-sec'),button=$('.uv-btn',body),label=$('span',button);
   const veil=document.createElement('div');veil.className='uv-layer';veil.hidden=true;
   // Ce qui n'apparaît qu'à la lumière noire : des mots, le code du téléphone, et la clé (jamais au même endroit).
   const spots=[[10,78],[82,30],[86,52],[12,42],[72,68]];
@@ -525,13 +526,138 @@
   paint();
  }
 
- const builders=[buildTarifs,buildGift,buildAvis,buildFaq,buildContact];
- builders.forEach((build,index)=>build(roomEls[index].querySelector('.d-body')));
+ if(!SCROLL){
+  const builders=[buildTarifs,buildGift,buildAvis,buildFaq,buildContact];
+  builders.forEach((build,index)=>build(roomEls[index].querySelector('.d-body')));
+ }
+ // ---------- mode E : un site classique qui défile, avec un menu clair ----------
+ if(SCROLL){
+  const SITE='https://elucidescape.fr/';
+  const LEGAL=[['CGV',SITE+'cgv/'],['Mentions légales',SITE+'mentions-legales/'],['Confidentialité',SITE+'politique-de-confidentialite/'],['Cookies',SITE+'politique-de-cookies-ue/']];
+  const minPer=Object.keys(prices).reduce((best,n)=>Math.min(best,prices[n].per),999);
+  function fmtEuro(value){return(Math.round(value*10)/10).toString().replace('.',',')+' €'}
+  const eicon={
+   door:'<path d="M6 21V5a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v16M3 21h18"/>',
+   tag:'<path d="M3 3h8.5L21 12.5 12.5 21 3 11.5zM7.5 7.5h.01"/>',
+   gift:'<rect x="3" y="8" width="18" height="13" rx="1.5"/><path d="M12 8v13M3 12.5h18M12 8c-2.5-4-6-3-5 0 .6 1.7 3 1.2 5 0zm0 0c2.5-4 6-3 5 0-.6 1.7-3 1.2-5 0z"/>',
+   party:'<path d="M4 20l5-14 9 9zM14 4v3M19 7l-2 2M20 12h-3"/>',
+   work:'<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V4h6v3M3 13h18"/>',
+   star:'<path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/>',
+   ask:'<circle cx="12" cy="12" r="9"/><path d="M9.6 9.6a2.5 2.5 0 1 1 3.6 2.2c-.8.4-1.2 1-1.2 1.9M12 17h.01"/>',
+   phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/>',
+   menu:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+   book:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>'
+  };
+  const eSvg=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+eicon[name]+'</svg>';
+  // Contenu des deux sections absentes jusqu'ici (événements, professionnels) : repris de elucidescape.fr.
+  function buildEvents(body){
+   body.innerHTML='<div class="ev"><div class="ev-chips"><span>EVJF / EVG</span><span>Anniversaire</span><span>Mariage</span><span>Cousinade</span><span>Groupe privé</span></div>'
+    +'<div class="ev-fmt"><div><small>JUSQU’À 12 PERSONNES</small><b>Dans nos locaux</b><span>EVJF, EVG, anniversaire ou sortie privée : on adapte l’organisation à votre groupe.</span></div>'
+    +'<div><small>PLUS DE 12 PERSONNES</small><b>Chez vous</b><span>Mariage, grand anniversaire : une animation mobile sur le lieu de votre événement.</span></div></div>'
+    +'<div class="ev-btns"><a class="d-ticket" href="'+TEL+'"><span>Appeler · '+TELTEXT+'</span><small>Dites-nous la date, le lieu et le nombre de participants</small></a><a class="ev-alt" href="'+SITE+'evenements/" target="_blank" rel="noopener">Voir la page événements ↗</a></div></div>';
+  }
+  function buildPro(body){
+   body.innerHTML='<div class="ev"><div class="ev-chips"><span>Team building</span><span>Séminaire</span><span>Salon</span><span>Journée de cohésion</span></div>'
+    +'<div class="ev-facts"><div><b>20 à 100+</b><small>participants</small></div><div><b>Partout</b><small>entreprise, salon, extérieur</small></div><div><b>Clé en main</b><small>matériel, installation, animation</small></div><div><b>2 modes</b><small>collaboration ou compétition</small></div></div>'
+    +'<div class="ev-btns"><a class="d-ticket" href="'+SITE+'entreprises/" target="_blank" rel="noopener"><span>Demander un devis ↗</span><small>Escape box mobile pour vos équipes</small></a><a class="ev-alt" href="'+TEL+'">Appeler · '+TELTEXT+'</a></div></div>';
+  }
+  scenes.push(
+   ()=>{ // 5 · événements : guirlandes et confettis
+    const rnd=seeded(21);let s=sceneOpen+'<rect width="393" height="780" fill="#0a1224"/>';
+    s+='<path d="M-10 70Q100 150 196 90T403 80" fill="none" stroke="#2f5478" stroke-width="2.4"/>';
+    for(let i=0;i<9;i++){const x=10+i*45,y=82+Math.sin(i*.9)*22+(i%2)*6,c=['#e8832a','#62e4f5','#ffcf8a'][i%3];s+='<line x1="'+x+'" y1="'+(y-6)+'" x2="'+x+'" y2="'+(y+8)+'" stroke="#2f5478" stroke-width="2"/><circle cx="'+x+'" cy="'+(y+16)+'" r="9" fill="'+c+'" filter="url(#sb)" opacity=".7"/><circle cx="'+x+'" cy="'+(y+16)+'" r="5" fill="'+c+'"/>'}
+    for(let i=0;i<46;i++){const x=rnd()*393,y=120+rnd()*600,c=['#e8832a','#62e4f5','#ffcf8a','#b84bff'][i%4];s+='<rect x="'+x.toFixed(0)+'" y="'+y.toFixed(0)+'" width="'+(5+rnd()*5).toFixed(1)+'" height="'+(3+rnd()*3).toFixed(1)+'" fill="'+c+'" opacity=".4" transform="rotate('+(rnd()*180).toFixed(0)+' '+x.toFixed(0)+' '+y.toFixed(0)+')"/>'}
+    return s+'</svg>';
+   },
+   ()=>{ // 6 · professionnels : salle de réunion, écran et réseau
+    let s=sceneOpen+'<rect width="393" height="780" fill="#08111f"/><rect x="26" y="80" width="341" height="190" rx="10" fill="#0a1626" stroke="#2f5478" stroke-width="2"/><path d="M44 230L100 186 150 206 210 150 260 176 336 118" fill="none" stroke="#62e4f5" stroke-opacity=".55" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><g fill="#e8832a" fill-opacity=".7"><circle cx="100" cy="186" r="5"/><circle cx="210" cy="150" r="5"/><circle cx="336" cy="118" r="5"/></g>';
+    s+='<g fill="none" stroke="#2f5478" stroke-opacity=".5" stroke-width="2"><circle cx="70" cy="520" r="30"/><circle cx="196" cy="560" r="30"/><circle cx="322" cy="520" r="30"/><path d="M98 530L168 552M224 552L294 530"/></g>';
+    s+='<g fill="#14284a" stroke="#62e4f5" stroke-opacity=".5" stroke-width="2"><rect x="46" y="500" width="48" height="40" rx="8"/><rect x="172" y="540" width="48" height="40" rx="8"/><rect x="298" y="500" width="48" height="40" rx="8"/></g>';
+    return s+'</svg>';
+   }
+  );
+  const secs=[
+   {id:'m-tarifs',k:'01 · TARIFS',t:'Les tarifs',scene:0,build:buildTarifs},
+   {id:'m-gift',k:'02 · CARTE CADEAU',t:'À offrir',scene:1,build:buildGift},
+   {id:'m-events',k:'03 · ÉVÉNEMENTS PRIVÉS',t:'EVJF, anniversaire, mariage',scene:5,build:buildEvents},
+   {id:'m-pro',k:'04 · PROFESSIONNELS',t:'Team building, séminaire',scene:6,build:buildPro},
+   {id:'m-avis',k:'05 · AVIS',t:'Ils ont joué le jeu',scene:2,build:buildAvis},
+   {id:'m-faq',k:'06 · QUESTIONS',t:'Une question ?',scene:3,build:buildFaq},
+   {id:'m-contact',k:'07 · CONTACT',t:'Nous trouver',scene:4,build:buildContact}
+  ];
+  const page=$('.m-page'),hallSec=$('.m-hall');
+  $$('.m-sec').forEach(section=>section.remove());
+  const flow=document.createElement('div');flow.className='e-flow';
+  secs.forEach(def=>{
+   const section=document.createElement('section');section.className='e-sec';section.id=def.id;section.setAttribute('aria-label',def.t);
+   section.innerHTML='<div class="d-scene" aria-hidden="true">'+scenes[def.scene]()+'</div><header class="e-head"><small>'+def.k+'</small><h2>'+def.t+'</h2></header><div class="d-body"></div>';
+   flow.append(section);
+  });
+  const foot=document.createElement('footer');foot.className='e-foot';
+  foot.innerHTML='<b>ELUCID ESCAPE</b><p>'+addressHtml+'</p><nav aria-label="Informations légales">'+LEGAL.map(item=>'<a href="'+item[1]+'" target="_blank" rel="noopener">'+item[0]+'</a>').join('')+'</nav><small>© Elucid Escape</small>';
+  flow.append(foot);
+  hallSec.after(flow);
+  secs.forEach(def=>def.build($('#'+def.id+' .d-body')));
+
+  // Défilement vers une section : sert au menu, au dock, à la porte du fond du hall et aux liens internes.
+  function scrollToId(id,instant){
+   const target=document.getElementById(id);if(!target)return;
+   target.scrollIntoView({behavior:calm()||instant?'auto':'smooth',block:'start'});
+  }
+  api.setGoHook((id,instant)=>scrollToId(id,instant));
+  document.addEventListener('click',event=>{const go=event.target.closest('[data-room]');if(!go)return;event.preventDefault();scrollToId(go.dataset.room)});
+
+  // Le dock du bas : cinq repères et le menu complet.
+  const dock=$('.m-dock');
+  dock.innerHTML='<a href="#m-hall" data-e="m-hall">'+eSvg('door')+'<span>Salles</span></a><a href="#m-tarifs" data-e="m-tarifs">'+eSvg('tag')+'<span>Tarifs</span></a><a href="#m-gift" data-e="m-gift">'+eSvg('gift')+'<span>Cadeaux</span></a><button type="button" class="e-menu-btn" aria-haspopup="dialog" aria-expanded="false">'+eSvg('menu')+'<span>Menu</span></button><a class="book" href="'+BOOK+'" target="_blank" rel="noopener">'+eSvg('book')+'<span>Réserver</span></a>';
+  const menu=document.createElement('div');menu.className='e-menu';menu.hidden=true;menu.setAttribute('role','dialog');menu.setAttribute('aria-modal','true');menu.setAttribute('aria-label','Menu');
+  const rows=[
+   ['m-hall','door','Salles','Les Rouages de l’Apocalypse · CybertraX bientôt'],
+   ['m-tarifs','tag','Tarifs','De 2 à 6 joueurs · dès '+fmtEuro(minPer)+' par personne'],
+   ['m-gift','gift','Carte cadeau','Une aventure à offrir · valable 1 an'],
+   ['m-events','party','Événements','EVJF, anniversaire, mariage, cousinade'],
+   ['m-pro','work','Professionnels','Team building, séminaire, devis'],
+   ['m-avis','star','Avis','5,0 / 5 · 263 avis Google'],
+   ['m-faq','ask','Questions','Âge, durée, difficulté…'],
+   ['m-contact','phone','Contact','Adresse, téléphone, réseaux']
+  ];
+  menu.innerHTML='<div class="e-menu-card"><header><b>MENU</b><button type="button" class="e-menu-x" aria-label="Fermer le menu">Fermer ×</button></header><nav>'+rows.map(r=>'<a href="#'+r[0]+'" data-e="'+r[0]+'">'+eSvg(r[1])+'<span><b>'+r[2]+'</b><small>'+r[3]+'</small></span><i aria-hidden="true">›</i></a>').join('')+'</nav><a class="e-menu-book" href="'+BOOK+'" target="_blank" rel="noopener">Réserver mon créneau ↗</a><p>'+LEGAL.map(item=>'<a href="'+item[1]+'" target="_blank" rel="noopener">'+item[0]+'</a>').join(' · ')+'</p></div>';
+  document.body.append(menu);
+  const menuButton=$('.e-menu-btn',dock);
+  function openMenu(){menu.hidden=false;menuButton.setAttribute('aria-expanded','true');root.classList.add('m-locked');api.buzz(6);requestAnimationFrame(()=>requestAnimationFrame(()=>menu.classList.add('is-open')));const first=menu.querySelector('nav a');if(first)setTimeout(()=>first.focus({preventScroll:true}),150)}
+  function closeMenu(){menu.classList.remove('is-open');menuButton.setAttribute('aria-expanded','false');setTimeout(()=>{menu.hidden=true;root.classList.remove('m-locked')},calm()?30:280)}
+  menuButton.addEventListener('click',()=>{if(menu.hidden){openMenu()}else{closeMenu()}});
+  $('.e-menu-x',menu).addEventListener('click',closeMenu);
+  menu.addEventListener('click',event=>{
+   if(event.target===menu){closeMenu();return}
+   const link=event.target.closest('a[data-e]');
+   if(link){event.preventDefault();closeMenu();setTimeout(()=>scrollToId(link.dataset.e),calm()?40:300)}
+   else if(event.target.closest('a'))closeMenu();
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')if(!menu.hidden)closeMenu()});
+  // Le dock et le menu montrent où l'on est.
+  const here=new Map();
+  function mark(id){
+   $$('.m-dock [data-e]').forEach(link=>link.setAttribute('aria-current',String(link.dataset.e===id)));
+   menu.querySelectorAll('a[data-e]').forEach(link=>link.classList.toggle('is-here',link.dataset.e===id));
+   const named=['m-hall','m-tarifs','m-gift'].indexOf(id)>=0;menuButton.classList.toggle('is-here',!named);
+  }
+  if('IntersectionObserver' in window){
+   const spy=new IntersectionObserver(entries=>{
+    entries.forEach(entry=>{if(entry.isIntersecting)here.set(entry.target.id,entry.intersectionRatio);else here.delete(entry.target.id)});
+    let best='',score=-1;here.forEach((ratio,id)=>{if(ratio>score){score=ratio;best=id}});
+    if(best)mark(best);
+   },{rootMargin:'-35% 0px -45% 0px',threshold:[0,.1,.5,1]});
+   [hallSec,...$$('.e-sec')].forEach(section=>spy.observe(section));
+  }
+  mark('m-hall');
+ }
+
 
  // ---------- hall : enseigne + sceau ----------
  const board=centerDoor?centerDoor.parentNode:null;
  let rot=0,sel=0,tweenToken=0;
- if(board){
+ if(board)if(!SCROLL){
   const ui=document.createElement('div');ui.className='d-ui';
   const ticks=Array.from({length:40},(item,i)=>{const a=i*9*Math.PI/180;return'<line class="tick" style="opacity:'+(i%2?.14:.4)+'" x1="'+(126+121*Math.cos(a)).toFixed(1)+'" y1="'+(126+121*Math.sin(a)).toFixed(1)+'" x2="'+(126+(i%2?124:128)*Math.cos(a)).toFixed(1)+'" y2="'+(126+(i%2?124:128)*Math.sin(a)).toFixed(1)+'"/>'}).join('');
   ui.innerHTML='<div class="d-sign" role="button" tabindex="0" aria-live="polite"><small>VOTRE DESTINATION</small><strong></strong><span></span></div>'
@@ -586,7 +712,7 @@
  // Plaques au sol : tourner vers une porte, avec le nom écrit en toutes lettres.
  const floor=document.createElement('div');floor.className='d-floor';
  floor.innerHTML='<p>Touchez une porte, ou glissez vers elle</p><button type="button" class="a" data-look="-1"><i aria-hidden="true">‹</i>Les Rouages</button><button type="button" class="c" data-look="1"><i aria-hidden="true">›</i>CybertraX</button>';
- hall.append(floor);
+ if(!SCROLL)hall.append(floor);
  floor.addEventListener('click',event=>{const button=event.target.closest('[data-look]');if(button)api.setLook(Number(button.dataset.look))});
 
  // ---------- portes : une seule action ----------

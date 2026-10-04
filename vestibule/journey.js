@@ -8,6 +8,7 @@
  if(!api)return;
  if(!api.variant)return;
  if(api.variant==='d')return;
+ if(api.variant==='e')return;
  const variant=api.variant,app=api.app,root=api.root,hall=api.hall;
  const ids=['m-hall','m-tarifs','m-gift','m-avis','m-faq','m-equipe','m-contact'];
  const names=['Le hall','Tarifs','Cadeaux','Avis','Questions','L’équipe','Contact'];

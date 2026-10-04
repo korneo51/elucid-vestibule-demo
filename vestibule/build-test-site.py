@@ -21,7 +21,7 @@ repo = root.parent
 parser = argparse.ArgumentParser()
 parser.add_argument('--out', required=True)
 parser.add_argument('--document', action='store_true', help='write index.html as a complete document (GitHub Pages) instead of page content')
-parser.add_argument('--style', default='', choices=['', 'a', 'b', 'c', 'd'], help="phone travel style used until the visitor picks another ('' = classic scrolling page)")
+parser.add_argument('--style', default='', choices=['', 'a', 'b', 'c', 'd', 'e'], help="phone travel style used until the visitor picks another ('' = classic scrolling page)")
 args = parser.parse_args()
 out = Path(args.out)
 if out.exists():

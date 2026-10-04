@@ -17,7 +17,7 @@
  // Travel style: '' = classic scrolling page, 'a' / 'b' / 'c' = journey.js (room by room). ?v= is for local tests.
  const queryStyle=new URLSearchParams(location.search).get('v');
  if(queryStyle!==null)remember('ee-variant',queryStyle==='0'?'':queryStyle);
- const storedStyle=recall('ee-variant'),styleName=storedStyle!==null?storedStyle:(window.EE_DEFAULT_VARIANT||''),variant=['a','b','c','d'].indexOf(styleName)>=0?styleName:'';
+ const storedStyle=recall('ee-variant'),styleName=storedStyle!==null?storedStyle:(window.EE_DEFAULT_VARIANT||''),variant=['a','b','c','d','e'].indexOf(styleName)>=0?styleName:'';
 
  // ---------- build ----------
  const app=document.createElement('div');app.id='m-app';app.dataset.motion=calm?'calm':'full';
