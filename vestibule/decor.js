@@ -214,7 +214,7 @@
  if(keyChip)keyChip.addEventListener('click',event=>{
   event.stopImmediatePropagation();
   const left=KEYS-found.length;
-  api.say(left>0?'Il reste '+left+' clé'+(left>1?'s':'')+' à trouver : une par pièce. Cinq clés, un porte-clé offert.':'Vous avez les 5 clés !',{ms:3600});
+  const where={1:'Tarifs (une lampe UV traîne)',2:'Cadeaux (le cryptex)',3:'Avis (jusqu’à la dernière page)',4:'Questions (« Effrayé ? »)',5:'Contact (le code du maître du jeu)'};const missing=[1,2,3,4,5].filter(id=>found.indexOf(id)<0).map(id=>where[id]);api.say(left>0?'Il reste '+left+' clé'+(left>1?'s':'')+' : '+missing.join(' · ')+'.':'Vous avez les 5 clés !',{ms:7500});
  },true);
  function fmt(value){return(Math.round(value*10)/10).toString().replace('.',',')+' €'}
  // Glisser le long d'un élément : renvoie la position de 0 à 1.
@@ -240,7 +240,7 @@
  }
  eggEl.addEventListener('click',event=>{if(event.target===eggEl)eggEl.hidden=true});
 
- // ---------- 1. tarifs : le tableau d'abord, puis la lampe UV pour toute la pièce ----------
+ // ---------- 1. tarifs : le tableau d'abord, puis une lampe UV à attraper et à promener partout ----------
  function buildTarifs(body){
   const person='<svg viewBox="0 0 40 56" aria-hidden="true"><circle cx="20" cy="15" r="9"/><path d="M3 54c0-17 7-25 17-25s17 8 17 25z"/></svg>';
   const rows=[2,3,4,5,6].map(n=>{
@@ -249,46 +249,69 @@
   }).join('');
   body.innerHTML='<div class="tb"><div class="tb-h"><span>ÉQUIPE</span><span></span><span>PAR PERS.</span><span>SESSION</span></div>'+rows+'</div>'
    +'<a class="d-ticket" href="'+BOOK+'" target="_blank" rel="noopener"><span>Choisir mon créneau ↗</span><small>Le nombre de joueurs se choisit à la réservation</small></a>'
-   +'<button type="button" class="uv-btn" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 19l8-8M13 11l-3-3 5-5 3 3zM4 20l2-2"/><path d="M17 12l3 1M18 8l3-1M12 18l1 3" opacity=".7"/></svg><span>Allumer la lampe UV</span><i>1 CLÉ CACHÉE</i></button>'
+   +'<p class="d-bonus">ÉNIGME BONUS · <i>1 CLÉ</i> CACHÉE · une lampe UV traîne quelque part…</p>'
    +'<p class="d-note">* À 2 : un minimum d’expérience · À 6 : la cohésion devient difficile · Plus de 6 : <a href="#" data-room="m-contact">contactez-nous</a></p>';
-  const room=body.closest('.d-room,.e-sec'),button=$('.uv-btn',body),label=$('span',button);
-  const veil=document.createElement('div');veil.className='uv-layer';veil.hidden=true;
-  // Ce qui n'apparaît qu'à la lumière noire : des mots, le code du téléphone, et la clé (jamais au même endroit).
-  const spots=[[10,78],[82,30],[86,52],[12,42],[72,68]];
+  const room=body.closest('.d-room,.e-sec');
+  // Le calque ne bloque rien : seule la lampe se saisit, le reste de la page défile normalement.
+  const layer=document.createElement('div');layer.className='uv2';
+  const spots=[[10,5],[50,96],[89,96],[11,96]];
   const spot=spots[Math.floor(Math.random()*spots.length)];
-  veil.innerHTML='<div class="uv-dark"></div><div class="uv-hid"><span style="left:7%;top:23%;transform:rotate(-5deg)">1H30 POUR S’ÉCHAPPER</span><span style="right:8%;top:60%;transform:rotate(4deg)">DÈS 8 ANS</span><span style="left:9%;bottom:19%;transform:rotate(-3deg)">CODE DU MAÎTRE DU JEU : 6 9 0 #</span><span style="right:6%;top:41%;transform:rotate(-8deg);font-size:12px">LES PRIX NE BAISSENT PAS… ENFIN SI</span></div><i class="uv-beam"></i><p class="uv-help">Glissez le doigt : la lampe éclaire partout. Touchez pour la laisser chercher seule.</p>';
-  room.append(veil);
-  const hid=$('.uv-hid',veil),key=makeKey(1);key.style.cssText='position:absolute;left:'+spot[0]+'%;top:'+spot[1]+'%;width:46px;height:46px;margin:-23px 0 0 -23px;border-color:#e3b9ff;background:radial-gradient(circle at 50% 35%,#e9c8ff,#8d2bff);color:#240a4a;box-shadow:0 0 0 5px #8d2bff33,0 0 24px #b84bffaa;pointer-events:none';hid.append(key);
-  let fade=0,last=null,moved=0,on=false;
-  function beam(x,y){
-   veil.style.setProperty('--x',x.toFixed(1)+'px');veil.style.setProperty('--y',y.toFixed(1)+'px');veil.classList.add('seen');
-   const k=key.getBoundingClientRect(),v=veil.getBoundingClientRect();
-   if(Math.hypot(k.left+k.width/2-v.left-x,k.top+k.height/2-v.top-y)<70){key.style.pointerEvents='auto';if(key.parentNode===hid)veil.append(key)}
+  layer.innerHTML='<div class="uv2-hid"><span style="right:5%;top:98px;transform:rotate(2deg)">LA LUMIÈRE NOIRE RÉVÈLE L’INVISIBLE</span>'
+   +'<span style="left:6%;top:3%;transform:rotate(-3deg)">1H30 POUR S’ÉCHAPPER</span>'
+   +'<span style="right:5%;bottom:7%;transform:rotate(2deg)">DÈS 8 ANS · 2 À 6 JOUEURS</span>'
+   +'<span style="left:5%;bottom:3.5%;transform:rotate(-2deg)">CODE DU MAÎTRE DU JEU : 6 9 0 #</span></div>'
+   +'<i class="uv2-halo"></i>'
+   +'<div class="uv2-lamp" role="button" tabindex="0" aria-label="Lampe UV : attrapez-la et déplacez-la (ou utilisez les flèches du clavier)"><svg viewBox="0 0 76 76" aria-hidden="true"><defs><radialGradient id="uvl" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f6e6ff"/><stop offset=".4" stop-color="#c26bff"/><stop offset="1" stop-color="#5a1fa8"/></radialGradient></defs>'
+   +'<path d="M47 55l15 15a6 6 0 0 0 8-8L55 47z" fill="#241c44" stroke="#9a7ae0" stroke-width="2"/><circle cx="36" cy="36" r="29" fill="#120f2a" stroke="#9a7ae0" stroke-width="3"/><circle cx="36" cy="36" r="21" fill="url(#uvl)"/><circle cx="36" cy="36" r="21" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.5"/><path d="M36 8v6M36 58v6M8 36h6M58 36h6M16 16l4 4M52 52l4 4M56 16l-4 4M20 52l-4 4" stroke="#e9d0ff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/></svg></div>'
+   +'<p class="uv2-tip">Attrapez la lampe UV<br>et promenez-la</p>';
+  room.append(layer);
+  const hid=$('.uv2-hid',layer),lamp=$('.uv2-lamp',layer),key=makeKey(1);
+  key.style.cssText='position:absolute;left:'+spot[0]+'%;top:'+spot[1]+'%;width:46px;height:46px;margin:-23px 0 0 -23px;border-color:#e3b9ff;background:radial-gradient(circle at 50% 35%,#e9c8ff,#8d2bff);color:#240a4a;box-shadow:0 0 0 5px #8d2bff33,0 0 24px #b84bffaa;pointer-events:none';
+  hid.append(key);
+  let lx=0,ly=0,placed=false,offX=0,offY=0,holding=false,moved=0;
+  function place(x,y){
+   const w=layer.clientWidth,h=layer.clientHeight;
+   lx=clamp(x,30,Math.max(30,w-30));ly=clamp(y,30,Math.max(30,h-30));
+   lamp.style.transform='translate3d('+(lx-38).toFixed(1)+'px,'+(ly-38).toFixed(1)+'px,0)';
+   layer.style.setProperty('--x',lx.toFixed(1)+'px');layer.style.setProperty('--y',ly.toFixed(1)+'px');
+   if(key.parentNode===hid){
+    const k=key.getBoundingClientRect(),v=layer.getBoundingClientRect();
+    if(Math.hypot(k.left+k.width/2-v.left-lx,k.top+k.height/2-v.top-ly)<62){key.style.pointerEvents='auto';layer.append(key);key.classList.add('found');jingle()}
+   }
   }
-  function sweep(){
-   const v=veil.getBoundingClientRect(),start=performance.now(),duration=calm()?1:4200;
-   const tick=now=>{
-    const t=Math.min(1,(now-start)/duration),lane=Math.floor(t*5),local=(t*5)%1,x=(lane%2===0?local:1-local)*v.width,y=v.height*(.1+lane*.19);
-    beam(x,y);if(t<1)requestAnimationFrame(tick);
-   };
-   requestAnimationFrame(tick);
+  function start(){if(placed)return;if(layer.clientWidth<=0)return;placed=true;place(layer.clientWidth*.82,66)}
+  requestAnimationFrame(()=>requestAnimationFrame(start));
+  addEventListener('resize',()=>{if(placed)place(lx,ly)},{passive:true});
+  if('IntersectionObserver' in window)new IntersectionObserver(entries=>{if(entries[0].isIntersecting)start()}).observe(layer);
+  // Tenue en main, la lampe suit le doigt et fait défiler la page quand on approche du haut ou du bas de l'écran.
+  let lastX=0,lastY=0,raf=0;
+  function follow(){
+   raf=0;if(!holding)return;
+   const edge=130,limit=innerHeight-edge;let dy=0;
+   if(lastY>limit)dy=Math.min(20,4+(lastY-limit)/4);else if(lastY<110)dy=-Math.min(20,4+(110-lastY)/4);
+   if(dy)window.scrollBy(0,dy);
+   const v=layer.getBoundingClientRect(),px=lx,py=ly;
+   place(lastX-v.left-offX,lastY-v.top-offY);
+   moved+=Math.hypot(lx-px,ly-py);if(moved>6)layer.classList.add('moved');
+   raf=requestAnimationFrame(follow);
   }
-  function setUv(next){
-   on=next;veil.hidden=!on;button.setAttribute('aria-pressed',String(on));label.textContent=on?'Éteindre la lampe UV':'Allumer la lampe UV';room.classList.toggle('uv-on',on);
-   veil.style.setProperty('--x','-300px');veil.style.setProperty('--y','-300px');veil.classList.remove('seen');
-   tone([on?500:300],90,.06);api.buzz(6);
-  }
-  button.addEventListener('click',()=>setUv(!on));
-  const local=event=>{const v=veil.getBoundingClientRect();return[event.clientX-v.left,event.clientY-v.top]};
-  veil.addEventListener('pointerdown',event=>{
-   if(event.target.closest('.d-key'))return;
-   last=local(event);moved=0;beam(last[0],last[1]);try{veil.setPointerCapture(event.pointerId)}catch(error){}
+  lamp.addEventListener('pointerdown',event=>{
+   start();const v=layer.getBoundingClientRect();
+   lastX=event.clientX;lastY=event.clientY;
+   offX=event.clientX-v.left-lx;offY=event.clientY-v.top-ly;holding=true;moved=0;
+   layer.classList.add('held');try{lamp.setPointerCapture(event.pointerId)}catch(error){}api.buzz(6);
+   if(!raf)raf=requestAnimationFrame(follow);
   });
-  veil.addEventListener('pointermove',event=>{if(!last)return;const at=local(event);moved+=Math.hypot(at[0]-last[0],at[1]-last[1]);last=at;beam(at[0],at[1])});
-  const up=event=>{if(!last)return;last=null;try{veil.releasePointerCapture(event.pointerId)}catch(error){}if(moved<8)sweep()};
-  veil.addEventListener('pointerup',up);veil.addEventListener('pointercancel',up);
-  // Quitter la pièce éteint la lampe.
-  enterHooks[0]=()=>{if(on)setUv(false)};
+  lamp.addEventListener('pointermove',event=>{if(holding){lastX=event.clientX;lastY=event.clientY}});
+  const drop=event=>{
+   if(!holding)return;holding=false;layer.classList.remove('held');try{lamp.releasePointerCapture(event.pointerId)}catch(error){}
+   if(moved<6){lamp.classList.remove('pulse');void lamp.offsetWidth;lamp.classList.add('pulse')}
+  };
+  lamp.addEventListener('pointerup',drop);lamp.addEventListener('pointercancel',drop);
+  lamp.addEventListener('keydown',event=>{
+   const step=event.shiftKey?60:26,move={ArrowLeft:[-step,0],ArrowRight:[step,0],ArrowUp:[0,-step],ArrowDown:[0,step]}[event.key];
+   if(move){event.preventDefault();start();place(lx+move[0],ly+move[1]);layer.classList.add('moved')}
+  });
  }
 
  // ---------- 2. cadeaux : la carte d'abord, puis le cryptex ----------
@@ -419,14 +442,20 @@
   }
   // 5. l'obscurité : un interrupteur, et une clé qui brille dans le noir
   function lightInstrument(){
-   inst.innerHTML='<div class="sw"><button type="button" aria-label="Allumer ou éteindre la lumière" aria-pressed="true"><i></i></button><span>Éclairage : allumé</span></div>';
-   const toggle=$('.sw button',inst),label=$('.sw span',inst);
-   inst.append(lightKey);lightKey.style.visibility='hidden';
-   toggle.addEventListener('click',()=>{
-    const off=!toggle.classList.contains('off');
-    toggle.classList.toggle('off',off);toggle.setAttribute('aria-pressed',String(!off));box.classList.toggle('dark',off);
-    label.textContent=off?'Éclairage : tamisé… et si on cherchait ?':'Éclairage : allumé';lightKey.style.visibility=off?'visible':'hidden';
-    tone([off?220:330],90,.06);api.buzz(6);
+   const bulbSvg='<svg viewBox="0 0 48 66" aria-hidden="true"><defs><radialGradient id="blg" cx=".5" cy=".42" r=".6"><stop offset="0" stop-color="#fffbe6"/><stop offset=".55" stop-color="#ffd36a"/><stop offset="1" stop-color="#f2a33c"/></radialGradient></defs><g class="rays" stroke="#ffe3a1" stroke-width="3" stroke-linecap="round"><path d="M24 2V8M6 12l4 4M42 12l-4 4M1 30h6M47 30h-6"/></g><path class="glass" d="M24 10a16 16 0 0 0-10 28c2 2 3 4 3 7v3h14v-3c0-3 1-5 3-7A16 16 0 0 0 24 10z" fill="none" stroke="#fff" stroke-width="2.4" stroke-linejoin="round"/><path class="fil" d="M19 38l5-8 5 8" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="17" y="49" width="14" height="5" rx="2" fill="#9aa8b8"/><rect x="18.5" y="55" width="11" height="5" rx="2" fill="#7b8998"/><rect x="21" y="61" width="6" height="4" rx="2" fill="#5d6b7a"/></svg>';
+   inst.innerHTML='<button type="button" class="lt-bulb" aria-pressed="false" aria-label="Allumer la lumière">'+bulbSvg+'<span>Allumer</span></button><div class="lt"><p class="lt-hint">Il fait noir ici…<br><b>Touchez l’ampoule</b> dans le coin <i aria-hidden="true">↗</i></p><div class="lt-slot"></div></div>';
+   box.classList.add('dark');box.classList.remove('lit');
+   const bulb=$('.lt-bulb',inst),label=$('span',bulb),hint=$('.lt-hint',inst),slot=$('.lt-slot',inst);
+   bulb.addEventListener('click',()=>{
+    const on=!box.classList.contains('lit');
+    box.classList.toggle('lit',on);bulb.setAttribute('aria-pressed',String(on));bulb.setAttribute('aria-label',on?'Éteindre la lumière':'Allumer la lumière');
+    label.textContent=on?'Éteindre':'Allumer';
+    hint.innerHTML=on?'La lumière revient…<br><b>Voilà ce qui se cachait dans le noir.</b>':'Il fait noir ici…<br><b>Touchez l’ampoule</b> dans le coin <i aria-hidden="true">↗</i>';
+    tone(on?[880,1320]:[220],on?200:90,.07);api.buzz(on?[8,30,14]:6);
+    if(found.indexOf(4)<0){
+     if(on){setTimeout(()=>{if(box.classList.contains('lit')){lightKey.hidden=false;slot.append(lightKey);lightKey.classList.remove('arrive');void lightKey.offsetWidth;lightKey.classList.add('arrive')}},calm()?0:650)}
+     else if(lightKey.parentNode){lightKey.remove()}
+    }
     const now=Date.now();flips.push(now);while(flips.length>0)if(now-flips[0]>5000){flips.shift()}else{break}
     if(flips.length>=8){flips.length=0;egg('💥','Court-circuit !','Vous avez fait sauter le disjoncteur. Ne le dites pas au maître du jeu.','Il fait déjà assez noir comme ça.',[])}
    });
@@ -437,7 +466,7 @@
   const instruments=[lockInstrument,ageInstrument,timelineInstrument,gaugeInstrument,lightInstrument,mailInstrument];
   function show(i){
    buttons.forEach((button,k)=>button.classList.toggle('on',k===i));
-   box.classList.remove('dark');if(lightKey.parentNode)lightKey.remove();
+   box.classList.remove('dark','lit');if(lightKey.parentNode)lightKey.remove();
    title.textContent=i<5?faqs[i].q:'Une autre question ?';
    ans.innerHTML=i<5?faqs[i].a:'<p>Écrivez-nous ou appelez-nous : on vous répond.</p><p><a href="#" data-room="m-contact" style="color:#9defff;font-weight:800">Aller à la page Contact ›</a></p>';
    instruments[i]();api.buzz(4);
@@ -487,6 +516,7 @@
    {test:/^007$/,icon:'🕵️',title:'Agent 007 ?',text:'Désolé, ici on cherche un virus, pas un agent secret.',small:'Le virus s’appelle Kaluptein.'}
   ];
   function fire(secret){
+   typed='';history='';burst='';clearTimeout(burstTimer);paint();
    if(secret.melody)playMelody();
    egg(secret.icon,secret.title,secret.text,secret.small,secret.call?[{label:'Appeler pour de vrai',href:TEL}]:[]);
   }

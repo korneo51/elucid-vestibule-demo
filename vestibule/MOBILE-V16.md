@@ -18,12 +18,12 @@ Maquette de test uniquement. Retour demandé après les essais de navigation en 
 
 | Section | Contenu | Énigme bonus (une clé chacune) |
 |---|---|---|
-| Tarifs | Les cinq tarifs d'un coup, « Choisir mon créneau » | Lampe UV : éteint la section, la lampe éclaire partout, la clé change de place |
+| Tarifs | Les cinq tarifs d'un coup, « Choisir mon créneau » | Une lampe UV à attraper et à promener sur toute la section : elle révèle des mots cachés et la clé (qui change de place à chaque visite). Elle ne bloque jamais le défilement ; la page défile toute seule quand on la tient près du haut ou du bas de l'écran |
 | Carte cadeau | Carte et bouton « Offrir une carte cadeau » | Cryptex à six anneaux, message chiffré (A = 1) |
 | Événements (nouveau) | EVJF / EVG, anniversaire, mariage, cousinade ; jusqu'à 12 dans nos locaux, au-delà animation mobile ; appel et lien vers la page événements | aucune |
 | Professionnels (nouveau) | Team building, séminaire, salon ; 20 à 100+ participants, partout, clé en main, 2 modes ; devis et appel | aucune |
 | Avis | Dossier à deux pages | Une clé glissée à la dernière page |
-| Questions | Réponses du site, un instrument par question | Lumière éteinte dans « Effrayé ? » |
+| Questions | Réponses du site, un instrument par question | « Effrayé ? » : fond noir, texte blanc, une ampoule dans le coin ; la toucher allume la pièce et fait apparaître la clé |
 | Contact | Adresse, téléphone, mail, réseaux ; téléphone à touches avec tonalités et secrets | Code écrit à la lampe UV dans Tarifs |
 
 Les contenus des deux sections nouvelles sont repris de https://elucidescape.fr/evenements/ et https://elucidescape.fr/entreprises/. Elles renvoient vers ces pages pour le détail. Les cinq clés donnent toujours l'écran « Porte-clé gagné ! » (à brancher plus tard sur le panier de réservation).
@@ -35,6 +35,7 @@ Les contenus des deux sections nouvelles sont repris de https://elucidescape.fr/
 ## À valider sur un vrai téléphone
 
 - [ ] Menu et barre du bas : clarté, taille des zones, repère de la section en cours.
-- [ ] La lampe UV assombrit toute la section : on ne peut plus défiler dedans tant qu'elle est allumée (le bouton « Éteindre » reste accessible).
+- [ ] La lampe UV se prend et se déplace du doigt ; le reste de la page défile normalement. Prise en main, défilement automatique au bord de l'écran.
+- [ ] Le téléphone se remet à zéro après chaque secret ; liste des secrets et des clés dans `SECRETS.md`.
 - [ ] Durée et difficulté des énigmes ; sons du téléphone.
 - [ ] Un toucher juste après un défilement sert à arrêter l'élan, comme sur tout téléphone : le simulateur de test en a ignoré plusieurs.
