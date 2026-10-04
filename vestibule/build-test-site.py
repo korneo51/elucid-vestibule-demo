@@ -21,7 +21,7 @@ repo = root.parent
 parser = argparse.ArgumentParser()
 parser.add_argument('--out', required=True)
 parser.add_argument('--document', action='store_true', help='write index.html as a complete document (GitHub Pages) instead of page content')
-parser.add_argument('--style', default='', choices=['', 'a', 'b', 'c'], help="phone travel style used until the visitor picks another ('' = classic scrolling page)")
+parser.add_argument('--style', default='', choices=['', 'a', 'b', 'c', 'd'], help="phone travel style used until the visitor picks another ('' = classic scrolling page)")
 args = parser.parse_args()
 out = Path(args.out)
 if out.exists():
@@ -40,11 +40,12 @@ head = ('<title>Vestibule Elucid Escape</title>\n'
         + ('<script>window.EE_DEFAULT_VARIANT="' + args.style + '"</script>\n' if args.style else '') +
         '<style>:root{color-scheme:dark}html,body{background:#080d14}</style>\n'
         '<link rel="stylesheet" href="practical.css"><link rel="stylesheet" href="traversee/traversee.css">'
-        '<link rel="stylesheet" href="traversee.css"><link rel="stylesheet" href="hall-design.css"><link rel="stylesheet" href="mobile.css"><link rel="stylesheet" href="journey.css">\n'
-        '<script src="traversee.js" defer></script><script src="mobile.js" defer></script><script src="journey.js" defer></script>\n')
+        '<link rel="stylesheet" href="traversee.css"><link rel="stylesheet" href="hall-design.css"><link rel="stylesheet" href="mobile.css"><link rel="stylesheet" href="journey.css"><link rel="stylesheet" href="decor.css">\n'
+        '<script src="traversee.js" defer></script><script src="mobile.js" defer></script><script src="journey.js" defer></script><script src="decor.js" defer></script>\n')
 page = head + body
 
-for name in ('practical.css', 'traversee.css', 'hall-design.css', 'mobile.css', 'journey.css', 'traversee.js', 'mobile.js', 'journey.js'):
+copied = ('practical.css', 'traversee.css', 'hall-design.css', 'mobile.css', 'journey.css', 'decor.css', 'traversee.js', 'mobile.js', 'journey.js', 'decor.js')
+for name in copied:
     text = (root / name).read_text(encoding='utf-8').replace('../assets/', 'assets/')
     (out / name).write_text(text, encoding='utf-8')
 
@@ -54,7 +55,9 @@ shared = shared.replace("url('../assets/manrope-latin.woff2')", "url('data:font/
 (out / 'traversee').mkdir()
 (out / 'traversee' / 'traversee.css').write_text(shared, encoding='utf-8')
 
-wanted = set(re.findall(r'assets/[A-Za-z0-9_./-]+\.(?:webp|svg|jpg|png)', page))
+# Images named only in a script or a style sheet (the door close-ups of decor.js) must be copied too.
+scan = page + ''.join((out / name).read_text(encoding='utf-8') for name in copied)
+wanted = set(re.findall(r'assets/[A-Za-z0-9_./-]+\.(?:webp|svg|jpg|png)', scan))
 for rel in sorted(wanted):
     target = out / rel
     target.parent.mkdir(parents=True, exist_ok=True)

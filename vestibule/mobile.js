@@ -17,7 +17,7 @@
  // Travel style: '' = classic scrolling page, 'a' / 'b' / 'c' = journey.js (room by room). ?v= is for local tests.
  const queryStyle=new URLSearchParams(location.search).get('v');
  if(queryStyle!==null)remember('ee-variant',queryStyle==='0'?'':queryStyle);
- const storedStyle=recall('ee-variant'),styleName=storedStyle!==null?storedStyle:(window.EE_DEFAULT_VARIANT||''),variant=['a','b','c'].indexOf(styleName)>=0?styleName:'';
+ const storedStyle=recall('ee-variant'),styleName=storedStyle!==null?storedStyle:(window.EE_DEFAULT_VARIANT||''),variant=['a','b','c','d'].indexOf(styleName)>=0?styleName:'';
 
  // ---------- build ----------
  const app=document.createElement('div');app.id='m-app';app.dataset.motion=calm?'calm':'full';
@@ -254,7 +254,14 @@
   board.querySelectorAll('[data-room]').forEach(element=>element.addEventListener('click',event=>{event.preventDefault();faceOrEnter(element.dataset.room)}));
   enter.querySelector('.m-enter-go').addEventListener('click',()=>{if(look!==0)enterDoor(nameAt[String(look)])});
  }
+ // Style d: a mechanism on the door itself (decor.js) opens it, then the room sheet appears. Other styles zoom straight in.
  function enterDoor(name){
+  if(doorBusy)return;
+  const gateFn=window.eeMobile?window.eeMobile.doorGate:null;
+  if(gateFn){doorBusy=true;buzz(14);hideToast();stopPeek();clearTimeout(previewTimer);setPreview(name);gateFn(name,()=>{showSheet(name)},()=>{doorBusy=false});return}
+  enterDoorNow(name);
+ }
+ function enterDoorNow(name){
   if(doorBusy)return;doorBusy=true;buzz(14);hideToast();stopPeek();clearTimeout(previewTimer);
   root.classList.add('m-choosing');setPreview(name);
   if(calm){setTimeout(()=>showSheet(name),160);return}
@@ -421,5 +428,5 @@
   say('Votre téléphone limite les animations : les passages se font en douceur, sans zoom.',{top:true,ms:12000,action:'Tout voir',onAction:()=>setCalm(false,true)});
  }
  root.classList.add('m-ready');
- window.eeMobile={app:app,root:root,variant:variant,hall:hall,dockLinks:dockLinks,buzz:buzz,say:say,tween:tween,easeOut:easeOut,remember:remember,recall:recall,go:go,setGoHook:fn=>{goHook=fn},isCalm:()=>calm};
+ window.eeMobile={app:app,root:root,variant:variant,hall:hall,setLook:setLook,showSheet:showSheet,closeSheet:closeSheet,centerDoor:centerDoor,getLook:()=>look,dockLinks:dockLinks,buzz:buzz,say:say,tween:tween,easeOut:easeOut,remember:remember,recall:recall,go:go,setGoHook:fn=>{goHook=fn},isCalm:()=>calm};
 })();

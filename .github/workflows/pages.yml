@@ -4,7 +4,7 @@ name: Maquette en ligne (GitHub Pages)
 
 on:
   push:
-    branches: [claude/funny-mccarthy-bqse44]
+    branches: [claude/funny-mccarthy-bqse44, essai-decor-d]
   workflow_dispatch:
 
 permissions:
@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build the self-contained site
         run: |
-          python3 vestibule/build-test-site.py --out _site --document --style c
+          python3 vestibule/build-test-site.py --out _site --document --style d
           rm -f _site/index.wrapped.html
           touch _site/.nojekyll
       - name: Publish to the gh-pages branch
