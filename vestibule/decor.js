@@ -300,7 +300,7 @@
    drag.moved+=Math.abs(delta);if(drag.moved>6){rot+=delta;place();const before=sel;label();if(sel!==before)api.buzz(6)}
   });
   const finish=event=>{
-   if(!drag)return;if(event.pointerId!==drag.id)return;const item=drag;drag=null;
+   if(!drag)return;if(event.pointerId!==drag.id)return;const item=drag;drag=null;try{dial.releasePointerCapture(event.pointerId)}catch(error){}
    if(item.moved>6){snapTo(Math.round(-rot/72));return}
    if(item.node){const i=Number(item.node.dataset.i),kf=-rot/72,k=i+N*Math.round((kf-i)/N);snapTo(k);api.buzz(8)}
   };
