@@ -389,15 +389,17 @@
   }
   // 2. l'âge : un curseur
   function ageInstrument(){
-   const min=6,max=18;
-   inst.innerHTML='<div class="sl"><div class="sl-b"></div><div class="sl-t"></div><div class="sl-z" style="left:0;width:16.7%;background:#7a2a22;border-radius:7px 0 0 7px"></div><div class="sl-z" style="left:16.7%;width:75%;background:#e8832a"></div><div class="sl-z" style="left:91.7%;right:0;background:#35c5da;border-radius:0 7px 7px 0"></div><div class="sl-k"></div></div><div class="sl-s"><span>6</span><span>8</span><span>10</span><span>12</span><span>15</span><span>18 ans</span></div><p class="iq-note"></p>';
+   // De 6 à 18 ans la graduation est large (c'est là que ça se joue) ; de 18 à 100 ans et plus elle est comprimée : pas de limite d'âge.
+   const SPLIT=.8,MAX=100,toAge=p=>p<=SPLIT?Math.round(6+p/SPLIT*12):(p>=.97?MAX:Math.min(MAX,Math.round(18+(p-SPLIT)/(1-SPLIT)*82))),toPos=a=>a<=18?(a-6)/12*SPLIT:SPLIT+(a-18)/82*(1-SPLIT);
+   const marks=[6,8,10,12,15,18,100].map(a=>'<span style="left:'+(toPos(a)*100).toFixed(1)+'%">'+(a===100?'100+':a)+'</span>').join('');
+   inst.innerHTML='<p class="iq-note"></p><div class="sl"><div class="sl-b"></div><div class="sl-t"></div><div class="sl-z" style="left:0;width:'+(toPos(8)*100).toFixed(1)+'%;background:#7a2a22;border-radius:7px 0 0 7px"></div><div class="sl-z" style="left:'+(toPos(8)*100).toFixed(1)+'%;width:'+((SPLIT-toPos(8))*100).toFixed(1)+'%;background:#e8832a"></div><div class="sl-z" style="left:'+(SPLIT*100)+'%;right:0;background:#35c5da;border-radius:0 7px 7px 0"></div><div class="sl-k"></div></div><div class="sl-s sl-ages" aria-hidden="true">'+marks+'</div>';
    const slider=$('.sl',inst),knob=$('.sl-k',inst),bubble=$('.sl-b',inst),note=$('.iq-note',inst);
    function set(p){
-    const age=Math.round(min+p*(max-min)),pos=(age-min)/(max-min);
-    knob.style.left=(pos*100)+'%';bubble.style.left=(pos*100)+'%';bubble.textContent=age+' ans';
-    note.textContent=age<8?'Un peu jeune : dès 8 ans':age<15?'Possible, avec un adulte (moins de 15 ans)':'Oui, en autonomie';
+    const age=toAge(p),pos=toPos(age);
+    knob.style.left=(pos*100)+'%';bubble.style.left=(clamp(pos,.09,.91)*100)+'%';bubble.textContent=age>=MAX?'100 ans et +':age+' ans';
+    note.textContent=age<8?'Un peu jeune : dès 8 ans':age<15?'Possible, avec un adulte (moins de 15 ans)':age<18?'Oui, en autonomie':'Aucune limite d’âge : tout le monde a le droit de s’amuser !';
    }
-   track(slider,set);set((8-min)/(max-min));
+   track(slider,set);set(toPos(8));
   }
   // 3. la partie : une frise en quatre temps
   function timelineInstrument(){
