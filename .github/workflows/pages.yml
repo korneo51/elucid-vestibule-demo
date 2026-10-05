@@ -4,7 +4,7 @@ name: Maquette en ligne (GitHub Pages)
 
 on:
   push:
-    branches: [claude/funny-mccarthy-bqse44, essai-decor-d]
+    branches: [claude/funny-mccarthy-bqse44, essai-decor-d, claude/epic-pascal-fwl59f]
   workflow_dispatch:
 
 permissions:
