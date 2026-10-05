@@ -26,6 +26,7 @@ Lampe vue de profil, posée en haut à gauche de la section, qui éclaire vers l
 
 - Le cryptex et son message codé sont supprimés. La clé se cache maintenant dans le nœud du ruban de la carte (il remue de temps en temps) : une carte de 326 px de haut au lieu d'une section entière.
 - Questions : le curseur est **sous** le texte (le pouce ne cache plus ce qui change) ; les réponses sont raccourcies à une phrase, l'instrument visuel porte le reste.
+- Âge : le curseur va de 6 à « 100 ans et + ». De 6 à 18 ans la graduation est large (80 % de la barre), de 18 à 100 ans elle est comprimée (20 %), avec le message « Aucune limite d'âge : tout le monde a le droit de s'amuser ! ». La phrase d'état (« Possible, avec un adulte (moins de 15 ans) », « Oui, en autonomie »…) est maintenant **au-dessus** de la barre.
 - Contact : la mention « énigme bonus » est retirée ; le clavier est un peu plus compact.
 - Avis : la phrase « Une clé est glissée entre les pages » est retirée (la clé reste sur la dernière double page).
 - Le compteur de clés nomme les sections sans révéler les cachettes. Détail de toutes les énigmes : `SECRETS.md`.
