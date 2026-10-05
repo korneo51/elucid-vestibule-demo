@@ -344,7 +344,7 @@
   function fill(){
    pages.forEach((page,side)=>{
     const review=reviews[spread*2+side];
-    if(!review){page.innerHTML='';if(spread===spreads-1)if(side===1){page.append(makeKey(3));const hint=document.createElement('p');hint.className='by';hint.style.textAlign='center';hint.textContent='Une clé est glissée entre les pages';page.append(hint)}return}
+    if(!review){page.innerHTML='';if(spread===spreads-1)if(side===1){page.append(makeKey(3))}return}
     page.innerHTML='<p class="st" aria-hidden="true">★★★★★</p><blockquote></blockquote><p class="by"></p>'+(review.more?'<button type="button">Lire la suite</button>':'');
     page.querySelector('blockquote').textContent=review.q;page.querySelector('.by').textContent='— '+review.by;
     const more=page.querySelector('button');if(more)more.addEventListener('click',()=>{const box=modal.firstChild;box.innerHTML='';const q=document.createElement('p');q.textContent=review.q+' '+review.more;box.append(q);const by=document.createElement('b');by.textContent='— '+review.by+' · Avis Google';box.append(by);const close=document.createElement('button');close.type='button';close.textContent='Fermer';close.addEventListener('click',()=>{modal.hidden=true});box.append(close);modal.hidden=false;close.focus({preventScroll:true})});
