@@ -4,15 +4,15 @@ Document de test : à garder pour soi, il révèle toutes les énigmes.
 
 ## Les cinq clés
 
-Une clé par section. Le compteur en haut (« 0/5 ») se touche : il indique les sections qui en cachent encore une. `?keys=0` à la fin de l'adresse remet le compteur à zéro.
+Une clé par section. Le compteur en haut (« 0/5 ») se touche : il nomme les sections qui en cachent encore une, sans dire où. `?keys=0` à la fin de l'adresse remet le compteur à zéro.
 
 | N° | Section | Où est la clé | Comment l'obtenir |
 |---|---|---|---|
-| 1 | Tarifs | Dans la section, à l'un de quatre endroits tirés au hasard à chaque visite : coin haut-gauche, ou bas de la section (gauche, centre, droite) | Attraper la lampe UV (en haut à droite, près du titre), la promener sur la section : la clé s'illumine quand la lampe passe dessus, on la touche. Quand on tient la lampe près du haut ou du bas de l'écran, la page défile toute seule. |
-| 2 | Cadeaux | Sous le cryptex, une fois ouvert | Tourner les six anneaux pour écrire **ENIGME**. Indice affiché : 5 · 14 · 9 · 7 · 13 · 5 avec l'alphabet numéroté (A = 1). |
+| 1 | Tarifs | Dans la section, à l'un de quatre endroits tirés au hasard à chaque visite (bas-gauche, centre bas, droite, milieu-gauche) | Une lampe UV, vue de profil, est posée en haut à gauche de la section et éclaire vers le haut à gauche, un peu au loin. Il faut la saisir et la promener : l'encre invisible apparaît dans le faisceau et la clé s'illumine quand il passe dessus ; on la touche. Aucun texte n'annonce la lampe. Quand on la tient près du haut ou du bas de l'écran, la page défile toute seule. |
+| 2 | Cadeaux | Sous la carte cadeau, une fois le nœud défait | Toucher le nœud du ruban, en haut à droite de la carte (il remue de temps en temps) : il se défait et une clé tombe. |
 | 3 | Avis | Sur la page de droite du dossier, à la **dernière double page** (reviews 9/9) | Tourner les pages avec les flèches ou en balayant : cinq doubles pages, la clé est sur la dernière. |
-| 4 | Questions | Dans la question « Effrayé ? » | Choisir la tuile « Effrayé ? » : tout est noir, une ampoule dans le coin. La toucher : la lumière revient et la clé apparaît. |
-| 5 | Contact | Dans le retour de monnaie du téléphone, à droite des touches | Taper **6 9 0 #**. Ce code est écrit à la lampe UV dans Tarifs (« CODE DU MAÎTRE DU JEU : 6 9 0 # », en bas de la section). |
+| 4 | Questions | Dans la question « Effrayé ? » | Choisir la tuile « Effrayé ? » : tout est noir, une ampoule dans le coin du cadre. La toucher : la lumière revient et la clé apparaît. |
+| 5 | Contact | Dans le retour de monnaie du téléphone, à droite des touches | Taper **6 9 0 #**. Ce code est écrit à la lampe UV dans Tarifs (« CODE DU MAÎTRE DU JEU : 6 9 0 # », en bas à gauche de la section). La phrase du Contact « le maître du jeu ne décroche que pour ceux qui savent lire dans le noir » y renvoie, sans mot « bonus ». |
 
 Les cinq clés ouvrent l'écran « Porte-clé gagné ! ».
 

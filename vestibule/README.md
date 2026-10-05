@@ -1,5 +1,9 @@
 # Vestibule — essai de profondeur
 
+## Dernière itération : v17 (téléphone)
+
+Entrée refaite (logo en grand, clé à maintenir pour ouvrir), hall en deux cartes, lampe UV de profil, énigmes plus petites et sans étiquette « bonus », curseurs des questions sous le texte. Détails : `MOBILE-V17.md`.
+
 ## Exploration en cours : voyages A, B, C (téléphone)
 
 Trois façons d'avancer de pièce en pièce au lieu de défiler une page : traverser des portes (A), descendre en ascenseur (B), petits objets à manipuler au doigt qui ouvrent chacun leur porte (C). Sélecteur de style dans la barre du bas, parcours classique conservé. Détails : `VOYAGES.md`.

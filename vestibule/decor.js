@@ -214,7 +214,7 @@
  if(keyChip)keyChip.addEventListener('click',event=>{
   event.stopImmediatePropagation();
   const left=KEYS-found.length;
-  const where={1:'Tarifs (une lampe UV traîne)',2:'Cadeaux (le cryptex)',3:'Avis (jusqu’à la dernière page)',4:'Questions (« Effrayé ? »)',5:'Contact (le code du maître du jeu)'};const missing=[1,2,3,4,5].filter(id=>found.indexOf(id)<0).map(id=>where[id]);api.say(left>0?'Il reste '+left+' clé'+(left>1?'s':'')+' : '+missing.join(' · ')+'.':'Vous avez les 5 clés !',{ms:7500});
+  const where={1:'Tarifs',2:'Cadeaux',3:'Avis',4:'Questions',5:'Contact'};const missing=[1,2,3,4,5].filter(id=>found.indexOf(id)<0).map(id=>where[id]);api.say(left>0?'Il reste '+left+' clé'+(left>1?'s':'')+' : '+missing.join(' · ')+'.':'Vous avez les 5 clés !',{ms:7500});
  },true);
  function fmt(value){return(Math.round(value*10)/10).toString().replace('.',',')+' €'}
  // Glisser le long d'un élément : renvoie la position de 0 à 1.
@@ -249,21 +249,28 @@
   }).join('');
   body.innerHTML='<div class="tb"><div class="tb-h"><span>ÉQUIPE</span><span></span><span>PAR PERS.</span><span>SESSION</span></div>'+rows+'</div>'
    +'<a class="d-ticket" href="'+BOOK+'" target="_blank" rel="noopener"><span>Choisir mon créneau ↗</span><small>Le nombre de joueurs se choisit à la réservation</small></a>'
-   +'<p class="d-bonus">ÉNIGME BONUS · <i>1 CLÉ</i> CACHÉE · une lampe UV traîne quelque part…</p>'
    +'<p class="d-note">* À 2 : un minimum d’expérience · À 6 : la cohésion devient difficile · Plus de 6 : <a href="#" data-room="m-contact">contactez-nous</a></p>';
   const room=body.closest('.d-room,.e-sec');
   // Le calque ne bloque rien : seule la lampe se saisit, le reste de la page défile normalement.
+  // La lampe est vue de profil, posée en haut à gauche de la section, et éclaire vers le haut à gauche.
+  const ANGLE=35*Math.PI/180,AIM=[-Math.cos(ANGLE),-Math.sin(ANGLE)],SPOTS=[[80,36],[118,48],[152,58]];
   const layer=document.createElement('div');layer.className='uv2';
-  const spots=[[10,5],[50,96],[89,96],[11,96]];
+  const spots=[[50,86],[78,70],[22,80],[14,56]];
   const spot=spots[Math.floor(Math.random()*spots.length)];
   layer.innerHTML='<div class="uv2-hid"><span style="right:5%;top:98px;transform:rotate(2deg)">LA LUMIÈRE NOIRE RÉVÈLE L’INVISIBLE</span>'
    +'<span style="left:6%;top:3%;transform:rotate(-3deg)">1H30 POUR S’ÉCHAPPER</span>'
-   +'<span style="right:5%;bottom:7%;transform:rotate(2deg)">DÈS 8 ANS · 2 À 6 JOUEURS</span>'
-   +'<span style="left:5%;bottom:3.5%;transform:rotate(-2deg)">CODE DU MAÎTRE DU JEU : 6 9 0 #</span></div>'
+   +'<span style="right:5%;bottom:13%;transform:rotate(2deg)">DÈS 8 ANS · 2 À 6 JOUEURS</span>'
+   +'<span style="left:5%;bottom:7%;transform:rotate(-2deg)">CODE DU MAÎTRE DU JEU : 6 9 0 #</span></div>'
    +'<i class="uv2-halo"></i>'
-   +'<div class="uv2-lamp" role="button" tabindex="0" aria-label="Lampe UV : attrapez-la et déplacez-la (ou utilisez les flèches du clavier)"><svg viewBox="0 0 76 76" aria-hidden="true"><defs><radialGradient id="uvl" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#f6e6ff"/><stop offset=".4" stop-color="#c26bff"/><stop offset="1" stop-color="#5a1fa8"/></radialGradient></defs>'
-   +'<path d="M47 55l15 15a6 6 0 0 0 8-8L55 47z" fill="#241c44" stroke="#9a7ae0" stroke-width="2"/><circle cx="36" cy="36" r="29" fill="#120f2a" stroke="#9a7ae0" stroke-width="3"/><circle cx="36" cy="36" r="21" fill="url(#uvl)"/><circle cx="36" cy="36" r="21" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.5"/><path d="M36 8v6M36 58v6M8 36h6M58 36h6M16 16l4 4M52 52l4 4M56 16l-4 4M20 52l-4 4" stroke="#e9d0ff" stroke-opacity=".7" stroke-width="2" stroke-linecap="round"/></svg></div>'
-   +'<p class="uv2-tip">Attrapez la lampe UV<br>et promenez-la</p>';
+   +'<div class="uv2-lamp" role="button" tabindex="0" aria-label="Lampe UV : attrapez-la et déplacez-la (ou utilisez les flèches du clavier)"><svg viewBox="-200 -60 256 120" aria-hidden="true"><defs>'
+   +'<linearGradient id="uvbeam" x1="1" y1="0" x2="0" y2="0"><stop offset="0" stop-color="#d9a8ff" stop-opacity=".55"/><stop offset=".55" stop-color="#8d2bff" stop-opacity=".22"/><stop offset="1" stop-color="#8d2bff" stop-opacity="0"/></linearGradient>'
+   +'<linearGradient id="uvbody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4b4470"/><stop offset=".5" stop-color="#2a2548"/><stop offset="1" stop-color="#171430"/></linearGradient></defs>'
+   +'<path class="uv2-cone" d="M-34 -13L-150 -50L-150 50L-34 13Z" fill="url(#uvbeam)"/><g class="uv2-body">'
+   +'<path d="M-18 -9H46a6 6 0 0 1 6 6V3a6 6 0 0 1-6 6H-18z" fill="url(#uvbody)" stroke="#9a7ae0" stroke-width="1.6"/>'
+   +'<path d="M-18 -9L-32 -15V15L-18 9z" fill="#201b3f" stroke="#9a7ae0" stroke-width="1.6" stroke-linejoin="round"/>'
+   +'<ellipse class="uv2-lens" cx="-32" cy="0" rx="4.4" ry="15" fill="#f1d9ff" stroke="#fff" stroke-opacity=".7" stroke-width="1.2"/>'
+   +'<path d="M8 -9V-14H20V-9" fill="#b84bff" stroke="#e4c4ff" stroke-width="1.2" stroke-linejoin="round"/>'
+   +'<path d="M26 -8V8M32 -8V8M38 -8V8" stroke="#9a7ae0" stroke-opacity=".6" stroke-width="1.6" stroke-linecap="round"/></g></svg></div>';
   room.append(layer);
   const hid=$('.uv2-hid',layer),lamp=$('.uv2-lamp',layer),key=makeKey(1);
   key.style.cssText='position:absolute;left:'+spot[0]+'%;top:'+spot[1]+'%;width:46px;height:46px;margin:-23px 0 0 -23px;border-color:#e3b9ff;background:radial-gradient(circle at 50% 35%,#e9c8ff,#8d2bff);color:#240a4a;box-shadow:0 0 0 5px #8d2bff33,0 0 24px #b84bffaa;pointer-events:none';
@@ -271,15 +278,17 @@
   let lx=0,ly=0,placed=false,offX=0,offY=0,holding=false,moved=0;
   function place(x,y){
    const w=layer.clientWidth,h=layer.clientHeight;
-   lx=clamp(x,30,Math.max(30,w-30));ly=clamp(y,30,Math.max(30,h-30));
-   lamp.style.transform='translate3d('+(lx-38).toFixed(1)+'px,'+(ly-38).toFixed(1)+'px,0)';
-   layer.style.setProperty('--x',lx.toFixed(1)+'px');layer.style.setProperty('--y',ly.toFixed(1)+'px');
+   // La lampe éclaire vers le haut à gauche : elle peut dépasser un peu à droite et en bas pour atteindre les coins.
+   lx=clamp(x,30,Math.max(30,w+20));ly=clamp(y,30,Math.max(30,h+40));
+   lamp.style.transform='translate3d('+(lx-42).toFixed(1)+'px,'+(ly-42).toFixed(1)+'px,0)';
+   // Trois disques le long du faisceau : ils dévoilent ce qui est écrit à l'encre invisible, un peu au loin vers le haut à gauche.
+   SPOTS.forEach((spot,i)=>{layer.style.setProperty('--m'+i+'x',(lx+AIM[0]*spot[0]).toFixed(1)+'px');layer.style.setProperty('--m'+i+'y',(ly+AIM[1]*spot[0]).toFixed(1)+'px')});
    if(key.parentNode===hid){
     const k=key.getBoundingClientRect(),v=layer.getBoundingClientRect();
-    if(Math.hypot(k.left+k.width/2-v.left-lx,k.top+k.height/2-v.top-ly)<62){key.style.pointerEvents='auto';layer.append(key);key.classList.add('found');jingle()}
+    if(Math.hypot(k.left+k.width/2-v.left-(lx+AIM[0]*118),k.top+k.height/2-v.top-(ly+AIM[1]*118))<56){key.style.pointerEvents='auto';layer.append(key);key.classList.add('found');jingle()}
    }
   }
-  function start(){if(placed)return;if(layer.clientWidth<=0)return;placed=true;place(layer.clientWidth*.82,66)}
+  function start(){if(placed)return;if(layer.clientWidth<=0)return;placed=true;place(58,76)}
   requestAnimationFrame(()=>requestAnimationFrame(start));
   addEventListener('resize',()=>{if(placed)place(lx,ly)},{passive:true});
   if('IntersectionObserver' in window)new IntersectionObserver(entries=>{if(entries[0].isIntersecting)start()}).observe(layer);
@@ -314,47 +323,14 @@
   });
  }
 
- // ---------- 2. cadeaux : la carte d'abord, puis le cryptex ----------
+ // ---------- 2. cadeaux : la carte ; le nœud du ruban se défait et laisse tomber une clé ----------
  function buildGift(body){
-  const bow='<svg class="bw" viewBox="0 0 74 74" aria-hidden="true"><defs><linearGradient id="gbw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb95e"/><stop offset="1" stop-color="#d9690f"/></linearGradient></defs><path d="M30 0L74 44V74L44 74 0 30V0z" fill="url(#gbw)" opacity=".95"/><g transform="translate(52 22) rotate(45)"><ellipse cx="-9" cy="-4" rx="9" ry="5.5" fill="#ffd9a0" stroke="#8c4308" stroke-width="1.4"/><ellipse cx="9" cy="-4" rx="9" ry="5.5" fill="#ffd9a0" stroke="#8c4308" stroke-width="1.4"/><circle r="4" fill="#ffb95e" stroke="#8c4308" stroke-width="1.4"/></g></svg>';
-  const alphabet=Array.from({length:26},(item,i)=>'<span><b>'+String.fromCharCode(65+i)+'</b>'+(i+1)+'</span>').join('');
-  body.innerHTML='<div class="gi">'+bow+'<small>CARTE CADEAU</small><h3>Offrez une aventure</h3><p>La carte cadeau Elucid Escape · 2 à 6 joueurs</p><a class="d-ticket" href="'+GIFT+'" target="_blank" rel="noopener"><span>Offrir une carte cadeau ↗</span><small>Une aventure à partager</small></a></div>'
-   +'<div class="cx"><p class="d-bonus" style="margin:0 0 6px">ÉNIGME BONUS · <i>1 CLÉ</i> CACHÉE</p><div class="cx-tube"><i class="cx-cap l"></i><div class="cx-r"></div><i class="cx-cap r"></i></div>'
-   +'<p class="cx-q">Un message codé a été gravé sur le cryptex : <b>5 · 14 · 9 · 7 · 13 · 5</b></p><div class="cx-abc" aria-label="Alphabet numéroté">'+alphabet+'</div><div class="cx-k"></div></div>';
-  const rings=$('.cx-r',body),box=$('.cx',body),slot=$('.cx-k',body),tube=$('.cx-tube',body),answer='ENIGME';
-  const letters=['T','B','R','W','C','L'];
-  const columns=letters.map((letter,i)=>{
-   const column=document.createElement('button');column.type='button';column.className='cx-c';column.setAttribute('aria-label','Anneau '+(i+1)+', lettre '+letter);
-   column.innerHTML='<u></u><b></b><u></u>';rings.append(column);return column;
-  });
-  const wrap=(n)=>String.fromCharCode(65+mod(n,26));
-  function paintRing(i){
-   const parts=columns[i].children,code=letters[i].charCodeAt(0)-65;
-   parts[0].textContent=wrap(code-1);parts[1].textContent=letters[i];parts[2].textContent=wrap(code+1);
-   columns[i].setAttribute('aria-label','Anneau '+(i+1)+', lettre '+letters[i]);
-  }
-  columns.forEach((c,i)=>paintRing(i));
-  let solved=false;
-  function shift(i,step){
-   if(solved)return;
-   letters[i]=wrap(letters[i].charCodeAt(0)-65+step);paintRing(i);
-   const col=columns[i];col.classList.remove('tick');void col.offsetWidth;col.classList.add('tick');
-   tone([300+i*40],60,.05);api.buzz(4);
-   if(letters.join('')===answer){
-    solved=true;box.classList.add('ok');tube.classList.add('open');jingle();api.buzz([14,30,20]);
-    setTimeout(()=>slot.append(makeKey(2)),calm()?0:500);
-   }
-  }
-  columns.forEach((column,i)=>{
-   let start=null,did=false;
-   column.addEventListener('pointerdown',event=>{start=event.clientY;did=false;try{column.setPointerCapture(event.pointerId)}catch(error){}});
-   column.addEventListener('pointermove',event=>{
-    if(start===null)return;const dy=event.clientY-start;
-    if(Math.abs(dy)>=20){shift(i,dy<0?1:-1);start=event.clientY;did=true}
-   });
-   const end=event=>{if(start===null)return;start=null;try{column.releasePointerCapture(event.pointerId)}catch(error){}if(!did)shift(i,1)};
-   column.addEventListener('pointerup',end);column.addEventListener('pointercancel',end);
-   column.addEventListener('keydown',event=>{if(event.key==='ArrowUp'){event.preventDefault();shift(i,1)}if(event.key==='ArrowDown'){event.preventDefault();shift(i,-1)}});
+  const bow='<svg class="bw" viewBox="0 0 74 74" aria-hidden="true"><defs><linearGradient id="gbw" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffb95e"/><stop offset="1" stop-color="#d9690f"/></linearGradient></defs><path d="M30 0L74 44V74L44 74 0 30V0z" fill="url(#gbw)" opacity=".95"/><g class="knot"><g transform="translate(52 22) rotate(45)"><ellipse cx="-9" cy="-4" rx="9" ry="5.5" fill="#ffd9a0" stroke="#8c4308" stroke-width="1.4"/><ellipse cx="9" cy="-4" rx="9" ry="5.5" fill="#ffd9a0" stroke="#8c4308" stroke-width="1.4"/><circle r="4" fill="#ffb95e" stroke="#8c4308" stroke-width="1.4"/></g></g></svg>';
+  body.innerHTML='<div class="gi"><button type="button" class="gi-bow" aria-label="Le nœud du ruban : touchez-le pour le défaire">'+bow+'</button><small>CARTE CADEAU</small><h3>Offrez une aventure</h3><p>La carte cadeau Elucid Escape · 2 à 6 joueurs</p><a class="d-ticket" href="'+GIFT+'" target="_blank" rel="noopener"><span>Offrir une carte cadeau ↗</span><small>Une aventure à partager</small></a><div class="gi-k"></div></div>';
+  const knot=$('.gi-bow',body),slot=$('.gi-k',body);let undone=false;
+  knot.addEventListener('click',()=>{
+   if(undone)return;undone=true;knot.classList.add('undone');tone([523,784],150,.07);api.buzz([10,30,12]);
+   setTimeout(()=>{const key=makeKey(2);key.classList.add('arrive');slot.append(key)},calm()?0:520);
   });
  }
 
@@ -402,7 +378,7 @@
    mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/>'
   };
   const tiles=[['lock','Un escape game ?'],['users','Qui peut jouer ?'],['clock','Une partie ?'],['gauge','Difficulté ?'],['bulb','Effrayé ?'],['mail','Autre question']];
-  body.innerHTML='<div class="iq"><h4></h4><div class="iq-in"></div><div class="iq-a"></div></div><div class="iq-t">'+tiles.map((tile,i)=>'<button type="button" data-i="'+i+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+icon[tile[0]]+'</svg>'+tile[1]+'</button>').join('')+'</div>';
+  body.innerHTML='<div class="iq"><h4></h4><div class="iq-a"></div><div class="iq-in"></div></div><div class="iq-t">'+tiles.map((tile,i)=>'<button type="button" data-i="'+i+'"><svg viewBox="0 0 24 24" aria-hidden="true">'+icon[tile[0]]+'</svg>'+tile[1]+'</button>').join('')+'</div>';
   const box=$('.iq',body),title=$('h4',body),inst=$('.iq-in',body),ans=$('.iq-a',body),buttons=$$('.iq-t button',body);
   const lightKey=makeKey(4),flips=[];
   // 1. le cadenas : on glisse le loquet
@@ -463,12 +439,14 @@
   function mailInstrument(){
    inst.innerHTML='<div class="iq-lock"><svg viewBox="0 0 24 24" aria-hidden="true" style="width:46px;height:46px;fill:none;stroke:#62e4f5;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round">'+icon.mail+'</svg></div>';
   }
+  // Réponses courtes : le détail visuel est dans l'instrument juste en dessous.
+  const short=['Enfermés dans une salle, vous cherchez des indices et résolvez des énigmes pour en sortir à temps.','Dès 8 ans. Les groupes de moins de 15 ans viennent avec un adulte.','Quatre temps, environ 1 h 55 en tout.','Aucune condition physique ni compétence particulière : difficulté modérée.','Lumière tamisée et un bref passage dans le noir. La porte se déverrouille à tout moment.'];
   const instruments=[lockInstrument,ageInstrument,timelineInstrument,gaugeInstrument,lightInstrument,mailInstrument];
   function show(i){
    buttons.forEach((button,k)=>button.classList.toggle('on',k===i));
    box.classList.remove('dark','lit');if(lightKey.parentNode)lightKey.remove();
    title.textContent=i<5?faqs[i].q:'Une autre question ?';
-   ans.innerHTML=i<5?faqs[i].a:'<p>Écrivez-nous ou appelez-nous : on vous répond.</p><p><a href="#" data-room="m-contact" style="color:#9defff;font-weight:800">Aller à la page Contact ›</a></p>';
+   ans.innerHTML=i<5?'<p>'+short[i]+'</p>':'<p>Écrivez-nous ou appelez-nous : on vous répond.</p><p><a href="#" data-room="m-contact" style="color:#9defff;font-weight:800">Aller à la page Contact ›</a></p>';
    instruments[i]();api.buzz(4);
   }
   buttons.forEach((button,i)=>button.addEventListener('click',()=>show(i)));
@@ -488,7 +466,7 @@
   const svg=name=>'<svg viewBox="0 0 24 24" aria-hidden="true">'+icon[name]+'</svg>';
   const social=socials.map(item=>{const key=/instagram/.test(item[1])?'ig':/facebook/.test(item[1])?'fb':'li';return'<a href="'+item[1]+'" target="_blank" rel="noopener" aria-label="'+item[0]+'">'+svg(key)+'</a>'}).join('');
   body.innerHTML='<div class="ci"><div class="ci-r">'+svg('pin')+'<span class="adr"></span></div><div class="ci-r">'+svg('phone')+'<b>'+TELTEXT+'</b></div><div class="ci-r">'+svg('mail')+'<a href="mailto:'+mail+'" style="color:#9defff"></a></div><div class="ci-s">'+social+'</div></div>'
-   +'<div class="kp"><div class="kp-l"><div class="kp-d" aria-live="polite"></div><div class="kp-g"></div></div><div class="kp-r"><div class="kp-note">Énigme bonus : le maître du jeu ne décroche que pour ceux qui savent <b>lire dans le noir</b>…</div><div class="kp-slot" aria-label="Retour de monnaie"></div><a class="kp-call" href="'+TEL+'">Appeler</a><button type="button" class="kp-clr">Effacer</button></div></div>';
+   +'<div class="kp"><div class="kp-l"><div class="kp-d" aria-live="polite"></div><div class="kp-g"></div></div><div class="kp-r"><div class="kp-note">Le maître du jeu ne décroche que pour ceux qui savent <b>lire dans le noir</b>…</div><div class="kp-slot" aria-label="Retour de monnaie"></div><a class="kp-call" href="'+TEL+'">Appeler</a><button type="button" class="kp-clr">Effacer</button></div></div>';
   $('.adr',body).innerHTML=addressHtml.replace(/<br\s*\/?>/g,', ').replace(/^Elucid Escape,\s*/,'');
   $('.ci a[href^="mailto"]',body).textContent=mail;
   const display=$('.kp-d',body),grid=$('.kp-g',body),call=$('.kp-call',body),slot=$('.kp-slot',body);
@@ -628,6 +606,21 @@
   flow.append(foot);
   hallSec.after(flow);
   secs.forEach(def=>def.build($('#'+def.id+' .d-body')));
+
+  // Le hall : deux grandes cartes, une seule chose à faire (toucher la porte qu'on veut). Plus de balayage, de jauge ni d'engrenage.
+  const copy=$('.m-hall-copy',hallSec);
+  if(copy)copy.innerHTML='<p class="m-eyebrow">NOS AVENTURES</p><h2>Choisissez <em>votre porte.</em></h2>';
+  const choose=document.createElement('div');choose.className='e-choose';
+  const doors=[
+   ['rouages','Les Rouages de l’Apocalypse','Atelier mécanique · 2 à 6 joueurs','../assets/v12/room-rouages.webp','','Découvrir'],
+   ['cybertrax','CybertraX','Laboratoire futuriste','../assets/v12/room-cybertrax.webp','Bientôt','Découvrir']
+  ];
+  choose.innerHTML=doors.map(door=>'<button type="button" class="e-card" data-door="'+door[0]+'" aria-label="'+door[1]+(door[4]?' ('+door[4].toLowerCase()+')':'')+' : voir l’aventure"><img src="'+door[3]+'" alt="" width="1024" height="1536" decoding="async"><span class="e-card-tx"><b>'+door[1]+'</b><small>'+door[2]+'</small></span>'+(door[4]?'<i class="e-card-soon">'+door[4]+'</i>':'')+'<span class="e-card-go">'+door[5]+' <i aria-hidden="true">›</i></span></button>').join('')
+   +'<a class="e-more" href="#m-tarifs" data-room="m-tarifs">Tarifs et infos pratiques <i aria-hidden="true">↓</i></a>';
+  hallSec.append(choose);
+  choose.addEventListener('click',event=>{const card=event.target.closest('[data-door]');if(card){api.buzz(10);api.showSheet(card.dataset.door)}});
+  // L'ancien balayage du hall n'existe plus : on l'empêche de réagir derrière les cartes.
+  hallSec.addEventListener('pointerdown',event=>event.stopImmediatePropagation(),true);
 
   // Défilement vers une section : sert au menu, au dock, à la porte du fond du hall et aux liens internes.
   function scrollToId(id,instant){
