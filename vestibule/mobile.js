@@ -1,5 +1,5 @@
 /* Vestibule mobile, v13.
-   One idea per screen: slide the lock, push a door, scroll. The page is a normal scrolling document, so nothing here
+   One idea per screen: hold the key, push a door, scroll. The page is a normal scrolling document, so nothing here
    depends on faking scroll, and everything that moves is a transform or an opacity. Markup lives in the m-template element of index.html.
    Written without the double ampersand, which WordPress rewrites inside HTML blocks. */
 (() => {
@@ -25,7 +25,7 @@
  header.after(app);
  root.dataset.mPhase='gate';root.classList.add('m-locked');
  const $=selector=>app.querySelector(selector),$$=selector=>[...app.querySelectorAll(selector)];
- const gate=$('.m-gate'),door=$('.m-gate-door'),leafLeft=$('.m-leaf.l'),leafRight=$('.m-leaf.r'),light=$('.m-gate-light'),lock=$('.m-lock'),copy=$('.m-gate-copy'),slide=$('.m-slide'),fill=$('.m-slide-fill'),label=$('.m-slide-label'),thumb=$('.m-thumb'),skip=$('.m-skip');
+ const gate=$('.m-gate'),door=$('.m-gate-door'),leafLeft=$('.m-leaf.l'),leafRight=$('.m-leaf.r'),light=$('.m-gate-light'),copy=$('.m-gate-copy'),label=$('.m-slide-label'),plate=$('.m-plate'),arc=$('.m-plate-arc'),plateKey=$('.m-plate-key'),skip=$('.m-skip');
  const hall=$('.m-hall'),toast=$('.m-toast'),win=$('.m-win');
  // Move the existing sections (prices, reviews, questions...) into the new page. They keep their markup and their scripts.
  $$('.m-sec').forEach(section=>{
@@ -61,72 +61,90 @@
  function hideToast(){toast.classList.add('out');setTimeout(()=>{toast.hidden=true;toast.classList.remove('out')},380)}
  toast.addEventListener('click',event=>{if(event.target.closest('[data-act]')){if(toast.onAction)toast.onAction();hideToast()}if(event.target.closest('[data-close]'))hideToast()});
 
- // ---------- 1. the lock ----------
- let gateP=0,drag=null,unlocking=false,paintQueued=false,lastTick=0;
- const maxX=()=>Math.max(1,slide.clientWidth-thumb.offsetWidth-12);
+ // ---------- 1. the key: hold it to turn it, the door opens ----------
+ // Press and hold the key in the lock (about a second). Letting go early turns it back. Keyboard users and screen readers
+ // activate the button once and it turns by itself. Everything that moves is a transform, an opacity or a dash offset.
+ const HOLD_MS=950,ARC=2*Math.PI*49,HINT='Maintenez la clé pour entrer';
+ let gateP=0,hold=null,unlocking=false,lastTick=0,hintTimer=0;
+ arc.style.strokeDasharray=String(ARC.toFixed(2));
+ function setHint(text){label.textContent=text}
  function paintGate(p){
-  const open=clamp((p-.4)/.6,0,1),distance=p*maxX();
-  thumb.style.transform='translate3d('+distance.toFixed(1)+'px,0,0)';
-  fill.style.transform='scaleX('+clamp((distance+58)/slide.clientWidth,0,1).toFixed(3)+')';
-  label.style.opacity=String(clamp(1-p*1.9,0,1));
-  lock.style.transform='rotate('+(p*210).toFixed(1)+'deg) scale('+(1+p*.08).toFixed(3)+')';
-  leafLeft.style.transform='translate3d('+(-open*100).toFixed(1)+'%,0,0)';leafRight.style.transform='translate3d('+(open*100).toFixed(1)+'%,0,0)';
+  arc.style.strokeDashoffset=((1-p)*ARC).toFixed(2);
+  plateKey.style.transform='rotate('+(p*90).toFixed(1)+'deg)';
+  plate.style.scale=String((1+p*.06).toFixed(3));
   light.style.opacity=String((.3+p*.7).toFixed(3));
-  copy.style.opacity=String((1-p*.55).toFixed(3));copy.style.transform='translate3d(0,'+(p*10).toFixed(1)+'px,0)';
+  const crack=clamp((p-.55)/.45,0,1)*2.2;
+  leafLeft.style.transform='translate3d(-'+crack.toFixed(2)+'%,0,0)';leafRight.style.transform='translate3d('+crack.toFixed(2)+'%,0,0)';
+  door.style.setProperty('--glow',(.25+p*.75).toFixed(3));
+  door.style.translate=(!calm&&p>.45&&p<1)?(((Math.random()-.5)*2*p*1.8).toFixed(2)+'px 0'):'0 0';
+  copy.style.opacity=String((1-p*.5).toFixed(3));
+  label.style.opacity=String((1-p*.6).toFixed(3));
  }
- function queuePaint(){if(paintQueued)return;paintQueued=true;requestAnimationFrame(()=>{paintQueued=false;paintGate(gateP)})}
- thumb.addEventListener('pointerdown',event=>{
+ function holdLoop(now){
+  if(!hold)return;
+  const dt=Math.min(50,now-hold.t);hold.t=now;
+  gateP=Math.min(1,gateP+dt/HOLD_MS);
+  const mark=Math.floor(gateP*5);if(mark!==lastTick){lastTick=mark;buzz(7)}
+  paintGate(gateP);
+  if(gateP>=1){hold=null;plate.classList.remove('is-held');unlock();return}
+  hold.raf=requestAnimationFrame(holdLoop);
+ }
+ plate.addEventListener('pointerdown',event=>{
+  if(unlocking)return;if(hold)return;
+  tweenId++;clearTimeout(hintTimer);
+  hold={id:event.pointerId,t:performance.now(),start:performance.now(),raf:0};
+  try{plate.setPointerCapture(event.pointerId)}catch(error){}
+  plate.classList.add('is-held');plate.classList.remove('is-tip');setHint('Continuez…');startTilt();
+  hold.raf=requestAnimationFrame(holdLoop);
+ });
+ function endHold(event){
+  if(!hold)return;if(event.pointerId!==hold.id)return;
+  const finished=hold;hold=null;cancelAnimationFrame(finished.raf);plate.classList.remove('is-held');
   if(unlocking)return;
-  tweenId++;drag={id:event.pointerId,x:event.clientX,p:gateP,moved:false,lastX:event.clientX,lastT:performance.now(),speed:0};
-  try{thumb.setPointerCapture(event.pointerId)}catch(error){}
-  thumb.style.animation='none';startTilt();
- });
- thumb.addEventListener('pointermove',event=>{
-  if(!drag)return;if(event.pointerId!==drag.id)return;
-  const dx=event.clientX-drag.x,now=performance.now();
-  if(Math.abs(dx)>5)drag.moved=true;
-  if(now>drag.lastT)drag.speed=(event.clientX-drag.lastX)/(now-drag.lastT);
-  drag.lastX=event.clientX;drag.lastT=now;
-  gateP=clamp(drag.p+dx/maxX(),0,1);
-  const mark=Math.floor(gateP*4);if(mark!==lastTick){lastTick=mark;buzz(6)}
-  queuePaint();
- });
- function endDrag(event){
-  if(!drag)return;if(event.pointerId!==drag.id)return;
-  const finished=drag;drag=null;
-  if(event.type==='pointercancel'){rewind();return}
-  if(!finished.moved){autoUnlock();return}
-  if(gateP>=.84){unlock()}else if(finished.speed>.9){if(gateP>.35)unlock();else rewind()}else{rewind()}
+  const quick=performance.now()-finished.start<260;
+  rewind();
+  if(quick&&event.type==='pointerup'){plate.classList.remove('is-tip');void plate.offsetWidth;plate.classList.add('is-tip');setHint('Gardez le doigt appuyé !');buzz(10)}
+  else setHint(HINT);
+  clearTimeout(hintTimer);hintTimer=setTimeout(()=>{plate.classList.remove('is-tip');if(!unlocking)setHint(HINT)},2600);
  }
- thumb.addEventListener('pointerup',endDrag);thumb.addEventListener('pointercancel',endDrag);
- thumb.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();autoUnlock()}});
- slide.addEventListener('click',event=>{if(event.target.closest('.m-thumb'))return;autoUnlock()});
- function rewind(){lastTick=0;tween(gateP,0,420,easeOut,value=>{gateP=value;paintGate(value)})}
- function autoUnlock(){if(unlocking)return;startTilt();tween(gateP,1,calm?200:560,easeInOut,value=>{gateP=value;paintGate(value)},unlock)}
+ plate.addEventListener('pointerup',endHold);plate.addEventListener('pointercancel',endHold);
+ // A long press can open the browser menu on some phones: it would cancel the hold.
+ plate.addEventListener('contextmenu',event=>event.preventDefault());
+ plate.addEventListener('keydown',event=>{if(event.key==='Enter'||event.key===' '){event.preventDefault();if(!event.repeat)autoUnlock()}});
+ function rewind(){lastTick=0;tween(gateP,0,calm?120:380,easeOut,value=>{gateP=value;paintGate(value)})}
+ function autoUnlock(){if(unlocking)return;startTilt();tween(gateP,1,calm?200:700,easeInOut,value=>{gateP=value;paintGate(value)},unlock)}
  function unlock(){
-  if(unlocking)return;unlocking=true;gateP=1;paintGate(1);buzz([16,40,28]);gate.classList.add('is-open');
+  if(unlocking)return;unlocking=true;gateP=1;paintGate(1);buzz([16,40,28]);gate.classList.add('is-open');setHint('');
+  // The seam gives way: both leaves slide apart.
+  const slideOpen='transform .8s cubic-bezier(.7,0,.25,1) .1s';
+  leafLeft.style.transition=slideOpen;leafRight.style.transition=slideOpen;
+  leafLeft.style.transform='translate3d(-100%,0,0)';leafRight.style.transform='translate3d(100%,0,0)';
   if(calm){
-   setTimeout(()=>{gate.classList.add('is-fading');setPhase('arrive')},380);
-   setTimeout(finishGate,1000);
+   setTimeout(()=>{gate.classList.add('is-fading');setPhase('arrive')},520);
+   setTimeout(finishGate,1100);
    return;
   }
   // Dolly into the light, then dissolve into the hall while its doors rise.
   setTimeout(()=>{
    const box=door.getBoundingClientRect(),scale=Math.max(innerWidth/box.width,innerHeight/box.height)*1.3;
    door.style.transition='transform 1.05s cubic-bezier(.66,.02,.86,.34)';door.style.transform='scale('+scale.toFixed(2)+')';
-  },420);
-  setTimeout(()=>{gate.classList.add('is-fading');setPhase('arrive')},1120);
-  setTimeout(finishGate,1750);
+  },620);
+  setTimeout(()=>{gate.classList.add('is-fading');setPhase('arrive')},1320);
+  setTimeout(finishGate,1950);
  }
  function finishGate(){
   gate.hidden=true;root.classList.remove('m-locked');setPhase('page');window.scrollTo(0,0);
   door.style.transition='none';door.style.transform='';unlocking=false;
   setTimeout(peek,1500);
-  if(!recall('ee-key-hint')){remember('ee-key-hint','1');setTimeout(()=>say('Psst… 5 clés sont cachées dans le vestibule. Les trouverez-vous ?',{ms:6000}),900)}
+  // A phone that asks for fewer animations gets a short explanation once, in the hall (never over the entrance); the key hint waits its turn.
+  const explainCalm=calmQuery.matches&&recall('ee-motion')===null&&!recall('ee-calm-told');
+  if(explainCalm){remember('ee-calm-told','1');setTimeout(()=>say('Animations réduites : c’est un réglage de votre téléphone, pas un bug du site.',{ms:9000,action:'Tout voir',onAction:()=>setCalm(false,true)}),900)}
+  if(!recall('ee-key-hint')){remember('ee-key-hint','1');setTimeout(()=>say('Psst… 5 clés sont cachées dans le vestibule. Les trouverez-vous ?',{ms:6000}),explainCalm?10600:900)}
  }
  function showGate(){
   hideToast();gate.hidden=false;gate.classList.remove('is-open','is-fading');door.style.transition='none';door.style.transform='';
-  gateP=0;paintGate(0);thumb.style.animation='none';void thumb.offsetWidth;thumb.style.animation='';unlocking=false;if(board)if(look!==0)setLook(0,true);
+  leafLeft.style.transition='';leafRight.style.transition='';
+  gateP=0;lastTick=0;paintGate(0);setHint(HINT);plate.classList.remove('is-tip','is-held');unlocking=false;if(board)if(look!==0)setLook(0,true);
   root.classList.add('m-locked');setPhase('gate');window.scrollTo(0,0);
  }
  function skipGate(){
@@ -424,9 +442,6 @@
  // ---------- go ----------
  paintGate(0);
  if(recall('ee-skip-gate')==='1'){remember('ee-skip-gate','0');gate.hidden=true;root.classList.remove('m-locked');setPhase('page')}
- if(calmQuery.matches)if(recall('ee-motion')===null){
-  say('Votre téléphone limite les animations : les passages se font en douceur, sans zoom.',{top:true,ms:12000,action:'Tout voir',onAction:()=>setCalm(false,true)});
- }
  root.classList.add('m-ready');
  window.eeMobile={app:app,root:root,variant:variant,hall:hall,setLook:setLook,showSheet:showSheet,closeSheet:closeSheet,centerDoor:centerDoor,getLook:()=>look,dockLinks:dockLinks,buzz:buzz,say:say,tween:tween,easeOut:easeOut,remember:remember,recall:recall,go:go,setGoHook:fn=>{goHook=fn},isCalm:()=>calm};
 })();
